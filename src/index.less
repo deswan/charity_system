@@ -1,0 +1,65 @@
+@import "~antd/dist/antd";
+@import "./theme.less";
+.introduce-card {
+    &-img {
+        float: left;
+        width: 30%;
+        height: 80px;
+        background-size: 100%;
+        background-position: center;
+    }
+    &-block {
+        width: 60%;
+        margin-left: 35%;
+    }
+    &-text {
+        font-size: 12px;
+        margin: 5px 0 0 0;
+        &:nth-of-type(1) {
+            margin-top: 15px;
+        }
+    }
+}
+
+.content{
+    margin: 20px auto;
+    width:80%;
+    min-width:800px;
+}
+
+
+
+.ant-tag-checkable-checked {
+    background-color: @primary-color !important;
+}
+
+.antd-pro-tag-select-trigger {
+    color: @primary-color !important;
+}
+
+.ant-pagination-item-active {
+    background-color: @primary-color !important;
+    border-color: @primary-color !important;
+}
+
+.ant-pagination-item:focus,
+.ant-pagination-item:hover {
+    border-color: @primary-color !important;
+}
+
+a:hover {
+    color: @primary-color !important;
+}
+
+.ant-card-extra a {
+    color: @primary-color !important;
+}
+
+.ant-tag-checkable:not(.ant-tag-checkable-checked):hover {
+    color: @primary-color !important;
+}
+
+.ant-pagination-item:focus a,
+.ant-pagination-item:hover a {
+    color: @primary-color !important;
+}
