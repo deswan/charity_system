@@ -127,6 +127,11 @@ class App extends Component {
   handleOpen = (page) => {
     window.open('/' + page + '.html', '_self')
   }
+  componentWillMount(){
+    fetch('/api/').then((res)=>{
+      console.log(res)
+    })
+  }
   render() {
     return (
       <div>

@@ -1,0 +1,24 @@
+{
+    "activity_status": {
+        "0": {
+            "text": "未开始",
+            "badge":"default"
+        },
+        "1":{
+            "text": "预备中",
+            "badge":"warning"
+        },
+        "2":{
+            "text": "进行中",
+            "badge":"processing"
+        },
+        "3":{
+            "text": "已结束",
+            "badge":"success"
+        },
+        "4":{
+            "text": "已取消",
+            "badge":"error"
+        }
+    }
+}

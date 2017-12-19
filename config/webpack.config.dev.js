@@ -77,7 +77,12 @@ module.exports = {
       require.resolve('./polyfills'),
       require.resolve('react-dev-utils/webpackHotDevClient'),
       paths.appSrc+'/login/login.js'
-    ]
+    ],
+    personal_information:[
+      require.resolve('./polyfills'),
+      require.resolve('react-dev-utils/webpackHotDevClient'),
+      paths.appSrc+'/personal_information/personal_information.js'
+    ],
   },
   output: {
     // Add /* filename */ comments to generated require()s in the output.
@@ -273,6 +278,12 @@ module.exports = {
       chunks: ["login"],
       template: paths.appHtml,
       filename: 'login.html',
+    }),
+    new HtmlWebpackPlugin({
+      inject: true,
+      chunks: ["personal_information"],
+      template: paths.appHtml,
+      filename: 'personal_information.html',
     }),
     // Add module names to factory functions so they appear in browser profiler.
     new webpack.NamedModulesPlugin(),
