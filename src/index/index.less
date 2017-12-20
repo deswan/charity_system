@@ -9,3 +9,55 @@
         }
     }
 }
+.content{
+    margin:30px 50px 0 0;
+}
+.act-cover{
+    height: 150px;
+    background-size: cover;
+}
+.ant-list-item-content{
+    width:100%
+}
+.act-text-block{
+    margin-bottom:5px;
+}
+.ant-list-pagination{
+    text-align: center;
+}
+.previous-act-layer{
+    position: absolute;
+    opacity: 0;
+    top:0;
+    left:0;
+    height: 100%;
+    width: 100%;
+    background-color:rgba(0,0,0,0.3);
+    transition:all 1s ease;
+    &-text{
+        position: absolute;
+        bottom:10px;
+        color:white;
+        width: 80%;
+        transform: translateX(-50%);
+        margin-left: 50%;
+        text-align: center;
+        font-size: 14px;
+        transition:all .5s ease;
+    }
+}
+.previous-act{
+    position: relative;
+    height: 180px;
+    background-position: center;
+    background-size:100% auto;
+    &:hover{
+        cursor: pointer;
+        .previous-act-layer{
+            opacity: 1;
+            &-text{
+                bottom:30px;
+            }
+        }
+    }
+}

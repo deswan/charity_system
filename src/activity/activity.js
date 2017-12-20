@@ -2,8 +2,8 @@ import '../bootstrap.js';
 import ReactDOM from 'react-dom';
 import registerServiceWorker from '../registerServiceWorker';
 import React, { Component } from 'react';
-import './activity_detail.less';
-import { Layout, Menu, Card, List, Button, Avatar, Tag, Row, Col, Badge, Rate, Divider } from 'antd';
+import './activity.less';
+import { Layout, Menu, Card, List, Button, Avatar, Tag, Row, Col, Badge, Rate, Divider, Form, Popover, Input } from 'antd';
 import NumberInfo from 'ant-design-pro/lib/NumberInfo';
 import PageHeader from 'ant-design-pro/lib/PageHeader';
 import DescriptionList from 'ant-design-pro/lib/DescriptionList';
@@ -13,11 +13,15 @@ import LargeDetailListItem from '../components/LargeDetailListItem/LargeDetailLi
 import numeral from 'numeral';
 const { Header, Content, Footer, Sider } = Layout;
 const { Description } = DescriptionList;
+const FormItem = Form.Item;
+const { TextArea } = Input;
 
 class ActivityDetail extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            userStatus: 'NOT_JOIN',
+            isShowJoin: false,
             id: 23,
             name: 'asdsda',
             img: require('../img/img.jpg'),
@@ -70,12 +74,25 @@ class ActivityDetail extends Component {
     handleOpen = (page) => {
         window.open('/' + page + '.html', '_self')
     }
+    handleJoinVisibleChange = (visible) => {
+        this.setState({
+            isShowJoin: visible
+        });
+    }
+    handleSubmitApply() {
+        this.setState({
+            isShowJoin: false
+        });
+    }
     render() {
+        const { getFieldDecorator } = this.props.form;
+        const formItemLayout = {
+        };
         return (
             <div class="activity-detail">
                 <Layout >
                     <CHeader />
-                    <Content class="content">
+                    <Content class="center-content">
                         <div>
                             <PageHeader
                                 title={
@@ -85,7 +102,35 @@ class ActivityDetail extends Component {
                                     </div>
                                 }
                                 action={
-                                    <Button type="primary">参与</Button>
+                                    <Popover
+                                        content={
+                                            this.state.userStatus == 'NOT_JOIN' ?
+                                            (<Form onSubmit={this.handleSubmit}>
+                                                <FormItem
+                                                    label="申请理由"
+                                                    {...formItemLayout}
+                                                >
+                                                    {getFieldDecorator('apply-text', {
+                                                        rules: [{ max: 300, message: '不超过300个字符' }, { required: true, message: '不能为空' }],
+                                                        placeholder: '不超过300个字符'
+                                                    })(
+                                                        <TextArea />
+                                                        )}
+                                                </FormItem>
+                                                <div style={{ textAlign: 'right' }}>
+                                                    <Button onClick={this.handleSubmitApply.bind(this)} type="primary" size="small">申请</Button>
+                                                </div>
+                                                    </Form>) :
+                                                    (<span>您还未加入 {this.state.orgName} ，<a onClick={this.handleOpen.bind(this,'org/'+this.orgId)}>现在加入</a></span>)
+                                        }
+                                        title="参与活动"
+                                        placement="leftTop"
+                                        visible={this.state.isShowJoin}
+                                        trigger="click"
+                                        onVisibleChange={this.handleJoinVisibleChange}
+                                    >
+                                        {this.state.userStatus == 'JOINED' ? (<span>您已参与该活动</span>) : (<Button type="primary" onClick={this.handleJoin}>参与</Button>)}
+                                    </Popover>
                                 }
                                 content={
                                     <div>
@@ -98,11 +143,11 @@ class ActivityDetail extends Component {
                                         <div style={{ margin: '20px 0' }}>
                                             {
                                                 this.state.tags.map(item => {
-                                                    return <Tag color="cyan" key={item.id}><a href="https://github.com/ant-design/ant-design/issues/1862">{item.name}</a></Tag>
+                                                    return <Tag color="cyan" key={item.id}>{item.name}</Tag>
                                                 })
                                             }
                                         </div>
-                                        <ActivitySource img={this.state.orgImg} orgName={this.state.orgName} time={this.state.create_time} onClick={this.handleOpen.bind(this, 'org_detail')} />
+                                        <ActivitySource img={this.state.orgImg} orgName={this.state.orgName} time={this.state.create_time} onClick={this.handleOpen.bind(this, 'org/'+this.state.orgId)} />
                                     </div>
                                 }
                                 extraContent={
@@ -134,7 +179,7 @@ class ActivityDetail extends Component {
                                                 <List.Item>
                                                     <List.Item.Meta
                                                         avatar={<Avatar src={item.img} />}
-                                                        title={<a href="https://ant.design">{item.name}</a>}
+                                                        title={item.name}
                                                         description={'赞助总金额：' + numeral(item.money).format('0,0')}
                                                     />
                                                 </List.Item>
@@ -163,8 +208,8 @@ class ActivityDetail extends Component {
                                                     avatar={<Avatar src={item.userImg} />}
                                                     head={
                                                         <div>
-                                                            <h4>花花</h4>
-                                                            <p>恒阿斯顿撒多撒多大地产</p>
+                                                            <h4>{item.name}</h4>
+                                                            <p>{item.detail}</p>
                                                         </div>
                                                     }
                                                     sider={
@@ -199,6 +244,6 @@ class ActivityDetail extends Component {
         );
     }
 }
-
-ReactDOM.render(<ActivityDetail />, document.getElementById('root'));
+const ActivityDetailWrapper = Form.create()(ActivityDetail);
+ReactDOM.render(<ActivityDetailWrapper />, document.getElementById('root'));
 registerServiceWorker();

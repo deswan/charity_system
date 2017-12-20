@@ -2,6 +2,13 @@ import React, { Component } from 'react';
 import './ActivitySource.less';
 import {Avatar} from 'antd';
 
+/*
+*   img:String,
+*   onClick:function,
+*   orgName:String,
+*   time:String
+*/
+
 export default class App extends Component {
     constructor(props) {
         super(props);

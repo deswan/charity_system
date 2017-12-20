@@ -86,8 +86,8 @@ module.exports = function(proxy, allowedHost) {
       rewrites: [
         { from: /^\/activity_list/, to: '/activity_list.html' },
         { from: /^\/org_list/, to: '/org_list.html' },
-        { from: /^\/activity_detail/, to: '/activity_detail.html' },
-        { from: /^\/org_detail/, to: '/org_detail.html' },
+        { from: /^\/activity/, to: '/activity.html' },
+        { from: /^\/org/, to: '/org.html' },
         { from: /^\/login/, to: '/login.html' },
         { from: /^\/personal_information/, to: '/personal_information.html' }
       ]

@@ -3,9 +3,11 @@ import ReactDOM from 'react-dom';
 import registerServiceWorker from '../registerServiceWorker';
 import React, { Component } from 'react';
 import './index.less';
-import { Layout, Menu, Card, List, Button, Avatar, Tag } from 'antd';
+import { Layout, Menu, Card, List, Button, Avatar, Tag,Row,Icon } from 'antd';
 import NumberInfo from 'ant-design-pro/lib/NumberInfo';
+import TagSelect from 'ant-design-pro/lib/TagSelect';
 import CHeader from '../components/CHeader/CHeader';
+import ActivitySource from '../components/ActivitySource/ActivitySource';
 import numeral from 'numeral';
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -14,28 +16,80 @@ class App extends Component {
     super(props);
     this.state = {
       volCount: 1240812,
-      activityList: [{
-        img: require('../img/img.jpg'),
-        name: '衣暖人心 旧ads衣捐赠 再利用环',
-        time: '2017-10-17 11:11:12',
-        location: '广州市广东工业大学'
+      tags: [{
+        id: '1',
+        name: '123'
       }, {
-        img: require('../img/img.jpg'),
-        name: '衣暖人心 旧衣捐赠 再利用环',
-        time: '2017-10-17 11:11:12',
-        location: '广州市广东工业大学'
-      }, {
-        img: require('../img/img.jpg'),
-        name: '衣暖人心 旧衣捐赠 再利用环',
-        time: '2017-10-17 11:11:12',
-        location: '广州市广东工业大学'
-      }, {
-        img: require('../img/img.jpg'),
-        name: '衣暖人心 旧衣捐赠 再利用环',
-        time: '2017-10-17 11:11:12',
-        location: '广州市广东工业大学'
+        id: '1',
+        name: '123'
       }],
-      orgList: [
+      activities: [
+        {
+          id: 1,
+          img: require('../img/400*150.jpg'),
+          name: '衣暖人心 旧衣捐赠 再利用环保公益活动1',
+          time: '2017-10-17 11:11:12',
+          location: '广州市广东工业大学',
+          tags: [{
+            id: '1',
+            name: '123'
+          }, {
+            id: '1',
+            name: '123'
+          }],
+          orgId: 2,
+          orgImg: require('../img/400*150.jpg'),
+          orgName: '爱之花',
+          create_time: '2017-10-17 11:11:12'
+        },
+        {
+          id: 1,
+          img: require('../img/img.jpg'),
+          name: '衣暖人心 旧衣捐赠 再利用环保公益活动1',
+          time: '2017-10-17 11:11:12',
+          location: '广州市广东工业大学',
+          tags: [{
+            id: '1',
+            name: '123'
+          }, {
+            id: '1',
+            name: '123'
+          }],
+          orgId: 2,
+          orgImg: require('../img/img.jpg'),
+          orgName: '爱之花',
+          create_time: '2017-10-17 11:11:12'
+        },
+        {
+          id: 1,
+          img: require('../img/img.jpg'),
+          name: '衣暖人心 旧衣捐赠 再利用环保公益活动1',
+          time: '2017-10-17 11:11:12',
+          location: '广州市广东工业大学',
+          tags: [{
+            id: '1',
+            name: '123'
+          }, {
+            id: '1',
+            name: '123'
+          }],
+          orgId: 2,
+          orgImg: require('../img/img.jpg'),
+          orgName: '爱之花',
+          create_time: '2017-10-17 11:11:12'
+        }
+      ],
+      pagination: {
+        pageSize: 10,
+        current: 1,
+        total: 100,
+        onChange: ((page) => {
+          let pagination = this.state.pagination;
+          pagination.current = page;
+          this.setState({ pagination })
+        }),
+      },
+      orgs: [
         {
           img: require('../img/img.jpg'),
           name: '爱之花公益团队',
@@ -73,15 +127,7 @@ class App extends Component {
           }]
         }
       ],
-      sponsorList: [
-        {
-          id: 1,
-          img: require('../img/img.jpg'),
-          name: '恒大地产',
-          money: 10000
-        }
-      ],
-      volunteerList: [
+      volunteers: [
         {
           id: 1,
           img: require('../img/img.jpg'),
@@ -121,89 +167,102 @@ class App extends Component {
           name: '恒大地产',
           score: 200
         }
+      ],
+      reviewActivities: [
+        {
+          id: 1,
+          img: require('../img/img.jpg'),
+          name: '衣暖人心 旧衣捐赠 再利用环保公益活动1'
+        },
+        {
+          id: 1,
+          img: require('../img/img.jpg'),
+          name: ''
+        },
+        {
+          id: 1,
+          img: require('../img/img.jpg'),
+          name: ''
+        },
+        {
+          id: 1,
+          img: require('../img/img.jpg'),
+          name: ''
+        }
       ]
     }
   }
   handleOpen = (page) => {
-    window.open('/' + page + '.html', '_self')
+    window.open('/' + page, '_self')
   }
-  componentWillMount(){
-    fetch('/api/').then((res)=>{
-      console.log(res)
-    })
+  componentWillMount() {
+    // fetch('/api/').then((res)=>{
+    //   console.log(res)
+    // })
+  }
+  handleTagChange = (checkedTags) => {
+
   }
   render() {
     return (
       <div>
-        <Layout>
+        <Layout style={{ background: 'white' }}>
           <CHeader pageName={''} />
-          <Layout style={{ background: 'white' }}>
-            <Content style={{ padding: '20px 30px 0 70px' }}>
-              <Card title="推荐活动" extra={<a href="#">More</a>} bordered={false} onClick={this.handleOpen.bind(this, 'activity_detail')}>
+          <Layout style={{ background: 'white', width: '1200px', maxWidth: '80%', margin: '0 auto' }} >
+            <Content class="content">
+              <TagSelect onChange={this.handleTagChange} expandable style={{ marginBottom: '20px' }}>
+                {
+                  this.state.tags.map(item => {
+                    return <TagSelect.Option value={item.id}>{item.name}</TagSelect.Option>
+                  })
+                }
+              </TagSelect>
+              <Row>
                 <List
-                  grid={{ xs: 1, sm: 1, md: 2 }}
-                  dataSource={this.state.activityList}
+                  grid={{ xs: 1,md:3, gutter: 16 }}
+                  dataSource={this.state.activities}
                   renderItem={(item, idx) => (
                     <List.Item>
-                      <Card className="introduce-card" hoverable bordered={false}>
-                        <div className="introduce-card-img" style={{ backgroundImage: 'url(' + item.img + ')' }}></div>
-                        <div className="introduce-card-block">
-                          <h4>{item.name}</h4>
-                          <p className="introduce-card-text">时间：{item.time}</p>
-                          <p className="introduce-card-text">地点：{item.location}</p>
-                        </div>
+                      <Card
+                        hoverable
+                        onClick={this.handleOpen.bind(this,'activity/'+item.id)}
+                        cover={
+                          <div class="act-cover" style={{backgroundImage:`url(${item.img})`}}></div>
+                          }
+                      >
+                        <Card.Meta
+                          title={item.name}
+                          description={
+                            <div>
+                              <p class="act-inform"><Icon type="clock-circle-o" /> {item.time}</p>
+                              <p class="act-inform"><Icon type="environment-o" /> {item.location}</p>
+                            </div>
+                          }
+                        />
                       </Card>
                     </List.Item>
                   )}
                 />
-              </Card>
-              <Card title="义工组织" extra={<a href="#">More</a>} bordered={false}>
+              </Row>
+              <Card title="往期精彩活动" bordered={false}>
+              <Row>
                 <List
-                  dataSource={this.state.orgList}
-                  renderItem={(item, idx) => (
-                    <List.Item key={idx}>
-                      <List.Item.Meta
-                        avatar={<Avatar src={item.img} />}
-                        title={<a href="https://ant.design">{item.name}</a>}
-                        description={item.slogan}
-                      />
-                      <div style={{ flex: 1, paddingLeft: '20px' }}>
-                        {
-                          item.tags.map(item => {
-                            return <Tag color="cyan" key={item.id}><a href="https://github.com/ant-design/ant-design/issues/1862">{item.name}</a></Tag>
-                          })
-                        }
-                      </div>
-                      <NumberInfo
-                        subTitle={<span>义工人数</span>}
-                        total={numeral(item.volunteerCount).format('0,0')}
-                      />
-                      <NumberInfo
-                        style={{ marginLeft: '30px' }}
-                        subTitle={<span>活动数</span>}
-                        total={numeral(item.activityCount).format('0,0')}
-                      />
-                    </List.Item>
-                  )}
-                />
-              </Card>
-              <Card title="赞助商" bordered={false}>
-                <List
-                  grid={{ column: 3 }}
-                  dataSource={this.state.sponsorList}
+                  grid={{ gutter: 32, xs: 1, md: 4 }}
+                  dataSource={this.state.reviewActivities}
                   renderItem={(item, idx) => (
                     <List.Item>
-                      <List.Item.Meta
-                        avatar={<Avatar src={item.img} />}
-                        title={<a href="https://ant.design">{item.name}</a>}
-                        description={'赞助总金额：' + item.money}
-                      />
+                      <div class="previous-act" style={{ backgroundImage: 'url(' + item.img + ')' }}>
+                        <div class="previous-act-layer">
+                          <span class="previous-act-layer-text">{item.name}</span>
+                        </div>
+                      </div>
                     </List.Item>
                   )}
                 />
+              </Row>
               </Card>
             </Content>
-            <Sider width="300" style={{ background: 'white', padding: '0 20px' }}>
+            <Sider width="300" style={{ background: 'white'}}>
               <section class="vol-count-shower">
                 <NumberInfo
                   class="number-info"
@@ -214,7 +273,7 @@ class App extends Component {
               <Card title="义工排行" bordered={false}>
                 <List
                   size="small"
-                  dataSource={this.state.volunteerList}
+                  dataSource={this.state.volunteers}
                   renderItem={(item, idx) => (
                     <List.Item>
                       <List.Item.Meta

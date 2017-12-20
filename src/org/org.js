@@ -2,7 +2,7 @@ import '../bootstrap.js';
 import ReactDOM from 'react-dom';
 import registerServiceWorker from '../registerServiceWorker';
 import React, { Component } from 'react';
-import './org_detail.less';
+import './org.less';
 import { Layout, Menu, Card, List, Button, Avatar, Tag, Row, Col, Badge, Rate } from 'antd';
 import NumberInfo from 'ant-design-pro/lib/NumberInfo';
 import PageHeader from 'ant-design-pro/lib/PageHeader';
@@ -77,7 +77,7 @@ class App extends Component {
             <div class="org-detail">
                 <Layout>
                     <CHeader />
-                    <Content class="content">
+                    <Content class="center-content">
                         <PageHeader
                             logo={<img alt="" src={this.state.img} />}
                             title={

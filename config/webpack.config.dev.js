@@ -53,25 +53,20 @@ module.exports = {
       // initialization, it doesn't blow up the WebpackDevServer client, and
       // changing JS code would still trigger a refresh.
     ],
-    activity_list:[
-      require.resolve('./polyfills'),
-      require.resolve('react-dev-utils/webpackHotDevClient'),
-      paths.appSrc+'/activity_list/activity_list.js'
-    ],
     org_list:[
       require.resolve('./polyfills'),
       require.resolve('react-dev-utils/webpackHotDevClient'),
       paths.appSrc+'/org_list/org_list.js'
     ],
-    activity_detail:[
+    activity:[
       require.resolve('./polyfills'),
       require.resolve('react-dev-utils/webpackHotDevClient'),
-      paths.appSrc+'/activity_detail/activity_detail.js'
+      paths.appSrc+'/activity/activity.js'
     ],
-    org_detail:[
+    org:[
       require.resolve('./polyfills'),
       require.resolve('react-dev-utils/webpackHotDevClient'),
-      paths.appSrc+'/org_detail/org_detail.js'
+      paths.appSrc+'/org/org.js'
     ],
     login:[
       require.resolve('./polyfills'),
@@ -251,27 +246,21 @@ module.exports = {
     }),
     new HtmlWebpackPlugin({
       inject: true,
-      chunks: ["activity_list"],
-      template: paths.appHtml,
-      filename: 'activity_list.html',
-    }),
-    new HtmlWebpackPlugin({
-      inject: true,
       chunks: ["org_list"],
       template: paths.appHtml,
       filename: 'org_list.html',
     }),
     new HtmlWebpackPlugin({
       inject: true,
-      chunks: ["activity_detail"],
+      chunks: ["activity"],
       template: paths.appHtml,
-      filename: 'activity_detail.html',
+      filename: 'activity.html',
     }),
     new HtmlWebpackPlugin({
       inject: true,
-      chunks: ["org_detail"],
+      chunks: ["org"],
       template: paths.appHtml,
-      filename: 'org_detail.html',
+      filename: 'org.html',
     }),
     new HtmlWebpackPlugin({
       inject: true,

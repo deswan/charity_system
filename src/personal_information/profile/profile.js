@@ -36,39 +36,46 @@ class Profile extends Component {
             },
             resume: '',
             avatar: require('../../img/img.jpg'),
-            emailSuffix:['@163.com','@gmail.com'],
-            emailDataSource:[]
+            emailSuffix: ['@163.com', '@gmail.com'],
+            emailDataSource: []
         }
     }
     handleOpen = (page) => {
-        window.open('/' + page + '.html', '_self')
+        window.open('/' + page, '_self')
     }
     handleSubmitField = (fieldId) => {
         console.log('submit:', fieldId)
+        this.setState((prevState, props) => {
+            prevState[fieldId].isEdit = false;
+            return prevState;
+        })
 
     }
-    handleCloseField = (fieldId) => {
-        console.log('close:', fieldId)
-    }
-    handleEmailComplete = (value)=>{
+    handleEmailComplete = (value) => {
         this.setState({
-            emailDataSource:!value ? [] : [
+            emailDataSource: !value ? [] : [
                 value,
-                ...this.state.emailSuffix.map(item=>{
-                    return value+item;
+                ...this.state.emailSuffix.map(item => {
+                    return value + item;
                 })
             ]
-        }) 
+        })
     }
-    handleEdit = (fieldId)=>{
-        const {setFieldsValue} = this.props.form;
+    handleEdit = (fieldId) => {
+        const { setFieldsValue } = this.props.form;
         setFieldsValue({
-            [fieldId]:this.state[fieldId].value
+            [fieldId]: this.state[fieldId].value
         })
         this.setState((prevState, props) => {
             prevState[fieldId].isEdit = true;
             return prevState;
         })
+    }
+    handleVisibleChange = (fieldId, visible) => {
+        this.setState((prevState, props) => {
+            prevState[fieldId].isEdit = visible;
+            return prevState;
+        });
     }
     render() {
         const { getFieldDecorator } = this.props.form;
@@ -98,15 +105,16 @@ class Profile extends Component {
                                                     )}
                                             </FormItem>
                                             <div style={{ textAlign: 'right' }}>
-                                                <Button size="small" onClick={this.handleCloseField.bind(this, 'name')}>取消</Button>
-                                                <Button onClick={this.handleSubmitField.bind(this, 'name')} class="edit-confirm-btn" type="primary" size="small">确定</Button>
+                                                <Button onClick={this.handleSubmitField.bind(this, 'name')} class="edit-confirm-btn" type="primary" size="small">修改</Button>
                                             </div>
                                         </div>
                                     }
                                     title="姓名"
                                     visible={this.state.name.isEdit}
+                                    trigger="click"
+                                    onVisibleChange={this.handleVisibleChange.bind(this, 'name')}
                                 >
-                                    <a className="edit-btn" onClick={this.handleEdit.bind(this,'name')}><Icon type="edit" /></a>
+                                    <a className="edit-btn" onClick={this.handleEdit.bind(this, 'name')}><Icon type="edit" /></a>
                                 </Popover>
                             </Description>
                             <Description term="身份证号码">
@@ -125,20 +133,16 @@ class Profile extends Component {
                                                     )}
                                             </FormItem>
                                             <div style={{ textAlign: 'right' }}>
-                                                <Button size="small" onClick={this.handleCloseField.bind(this, 'creditCard')}>取消</Button>
-                                                <Button onClick={this.handleSubmitField.bind(this, 'creditCard')} class="edit-confirm-btn" type="primary" size="small">确定</Button>
+                                                <Button onClick={this.handleSubmitField.bind(this, 'creditCard')} class="edit-confirm-btn" type="primary" size="small">修改</Button>
                                             </div>
                                         </div>
                                     }
                                     title="身份证号码"
                                     visible={this.state.creditCard.isEdit}
+                                    trigger="click"
+                                    onVisibleChange={this.handleVisibleChange.bind(this, 'creditCard')}
                                 >
-                                    <a className="edit-btn" onClick={() => {
-                                        this.setState((prevState, props) => {
-                                            prevState.creditCard.isEdit = true;
-                                            return prevState;
-                                        })
-                                    }}><Icon type="edit" /></a>
+                                    <a className="edit-btn" onClick={this.handleEdit.bind(this, 'creditCard')}><Icon type="edit" /></a>
                                 </Popover>
                             </Description>
                             <Description term="出生日期">
@@ -157,20 +161,17 @@ class Profile extends Component {
                                                     )}
                                             </FormItem>
                                             <div style={{ textAlign: 'right' }}>
-                                                <Button size="small" onClick={this.handleCloseField.bind(this, 'birthday')}>取消</Button>
-                                                <Button onClick={this.handleSubmitField.bind(this, 'birthday')} className="edit-confirm-btn" type="primary" size="small">确定</Button>
+                                                <Button onClick={this.handleSubmitField.bind(this, 'birthday')} className="edit-confirm-btn" type="primary" size="small">修改</Button>
                                             </div>
                                         </div>
                                     }
                                     title="身份证号码"
                                     visible={this.state.birthday.isEdit}
+                                    trigger="click"
+                                    onVisibleChange={this.handleVisibleChange.bind(this, 'birthday')}
+
                                 >
-                                    <a className="edit-btn" onClick={() => {
-                                        this.setState((prevState, props) => {
-                                            prevState.birthday.isEdit = true;
-                                            return prevState;
-                                        })
-                                    }}><Icon type="edit" /></a>
+                                    <a className="edit-btn" onClick={this.handleEdit.bind(this, 'birthday')}><Icon type="edit" /></a>
                                 </Popover>
                             </Description>
                             <Description term="籍贯">
@@ -189,20 +190,16 @@ class Profile extends Component {
                                                     )}
                                             </FormItem>
                                             <div style={{ textAlign: 'right' }}>
-                                                <Button size="small" onClick={this.handleCloseField.bind(this, 'origin')}>取消</Button>
-                                                <Button onClick={this.handleSubmitField.bind(this, 'origin')} className="edit-confirm-btn" type="primary" size="small">确定</Button>
+                                                <Button onClick={this.handleSubmitField.bind(this, 'origin')} className="edit-confirm-btn" type="primary" size="small">修改</Button>
                                             </div>
                                         </div>
                                     }
                                     title="籍贯"
                                     visible={this.state.origin.isEdit}
+                                    trigger="click"
+                                    onVisibleChange={this.handleVisibleChange.bind(this, 'origin')}
                                 >
-                                    <a className="edit-btn" onClick={() => {
-                                        this.setState((prevState, props) => {
-                                            prevState.origin.isEdit = true;
-                                            return prevState;
-                                        })
-                                    }}><Icon type="edit" /></a>
+                                    <a className="edit-btn" onClick={this.handleEdit.bind(this, 'origin')}><Icon type="edit" /></a>
                                 </Popover>
                             </Description>
                             <Description term="手机号">
@@ -221,20 +218,16 @@ class Profile extends Component {
                                                     )}
                                             </FormItem>
                                             <div style={{ textAlign: 'right' }}>
-                                                <Button size="small" onClick={this.handleCloseField.bind(this, 'phone')}>取消</Button>
-                                                <Button onClick={this.handleSubmitField.bind(this, 'phone')} className="edit-confirm-btn" type="primary" size="small">确定</Button>
+                                                <Button onClick={this.handleSubmitField.bind(this, 'phone')} className="edit-confirm-btn" type="primary" size="small">修改</Button>
                                             </div>
                                         </div>
                                     }
                                     title="手机号"
                                     visible={this.state.phone.isEdit}
+                                    trigger="click"
+                                    onVisibleChange={this.handleVisibleChange.bind(this, 'phone')}
                                 >
-                                    <a className="edit-btn" onClick={() => {
-                                        this.setState((prevState, props) => {
-                                            prevState.phone.isEdit = true;
-                                            return prevState;
-                                        })
-                                    }}><Icon type="edit" /></a>
+                                    <a className="edit-btn" onClick={this.handleEdit.bind(this, 'phone')}><Icon type="edit" /></a>
                                 </Popover>
                             </Description>
                             <Description term="邮箱">
@@ -256,20 +249,17 @@ class Profile extends Component {
                                                     )}
                                             </FormItem>
                                             <div style={{ textAlign: 'right' }}>
-                                                <Button size="small" onClick={this.handleCloseField.bind(this, 'email')}>取消</Button>
-                                                <Button onClick={this.handleSubmitField.bind(this, 'email')} className="edit-confirm-btn" type="primary" size="small">确定</Button>
+                                                <Button onClick={this.handleSubmitField.bind(this, 'email')} className="edit-confirm-btn" type="primary" size="small">修改</Button>
                                             </div>
                                         </div>
                                     }
                                     title="手机号"
+                                    trigger="click"
                                     visible={this.state.email.isEdit}
+                                    trigger="click"
+                                    onVisibleChange={this.handleVisibleChange.bind(this, 'email')}
                                 >
-                                    <a className="edit-btn" onClick={() => {
-                                        this.setState((prevState, props) => {
-                                            prevState.email.isEdit = true;
-                                            return prevState;
-                                        })
-                                    }}><Icon type="edit" /></a>
+                                    <a className="edit-btn" onClick={this.handleEdit.bind(this, 'email')}><Icon type="edit" /></a>
                                 </Popover>
                             </Description>
                         </DescriptionList>
