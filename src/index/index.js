@@ -27,7 +27,7 @@ class App extends Component {
       activities: [
         {
           id: 1,
-          img: require('../img/400*150.jpg'),
+          img: require('../img/400x150.jpg'),
           name: '衣暖人心 旧衣捐赠 再利用环保公益活动1',
           time: '2017-10-17 11:11:12',
           location: '广州市广东工业大学',
@@ -39,7 +39,7 @@ class App extends Component {
             name: '123'
           }],
           orgId: 2,
-          orgImg: require('../img/400*150.jpg'),
+          orgImg: require('../img/400x150.jpg'),
           orgName: '爱之花',
           create_time: '2017-10-17 11:11:12'
         },
