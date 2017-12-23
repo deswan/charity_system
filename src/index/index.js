@@ -3,10 +3,11 @@ import ReactDOM from 'react-dom';
 import registerServiceWorker from '../registerServiceWorker';
 import React, { Component } from 'react';
 import './index.less';
-import { Layout, Menu, Card, List, Button, Avatar, Tag,Row,Icon } from 'antd';
+import { Layout, Menu, Card, List, Button, Avatar, Tag, Row, Icon } from 'antd';
 import NumberInfo from 'ant-design-pro/lib/NumberInfo';
 import TagSelect from 'ant-design-pro/lib/TagSelect';
 import CHeader from '../components/CHeader/CHeader';
+import ActivityCard from '../components/ActivityCard/ActivityCard';
 import ActivitySource from '../components/ActivitySource/ActivitySource';
 import numeral from 'numeral';
 const { Header, Content, Footer, Sider } = Layout;
@@ -207,7 +208,7 @@ class App extends Component {
     return (
       <div>
         <Layout style={{ background: 'white' }}>
-          <CHeader pageName={''} />
+          <CHeader pageName="index" />
           <Layout style={{ background: 'white', width: '1200px', maxWidth: '80%', margin: '0 auto' }} >
             <Content class="content">
               <TagSelect onChange={this.handleTagChange} expandable style={{ marginBottom: '20px' }}>
@@ -219,50 +220,34 @@ class App extends Component {
               </TagSelect>
               <Row>
                 <List
-                  grid={{ xs: 1,md:3, gutter: 16 }}
+                  grid={{ xs: 1, md: 3, gutter: 16 }}
                   dataSource={this.state.activities}
                   renderItem={(item, idx) => (
                     <List.Item>
-                      <Card
-                        hoverable
-                        onClick={this.handleOpen.bind(this,'activity/'+item.id)}
-                        cover={
-                          <div class="act-cover" style={{backgroundImage:`url(${item.img})`}}></div>
-                          }
-                      >
-                        <Card.Meta
-                          title={item.name}
-                          description={
-                            <div>
-                              <p class="act-inform"><Icon type="clock-circle-o" /> {item.time}</p>
-                              <p class="act-inform"><Icon type="environment-o" /> {item.location}</p>
-                            </div>
-                          }
-                        />
-                      </Card>
+                      <ActivityCard onClick={this.handleOpen.bind(this,'activity/'+item.id)} img={item.img} name={item.name} time={item.time} location={item.location}/>
                     </List.Item>
                   )}
                 />
               </Row>
               <Card title="往期精彩活动" bordered={false}>
-              <Row>
-                <List
-                  grid={{ gutter: 32, xs: 1, md: 4 }}
-                  dataSource={this.state.reviewActivities}
-                  renderItem={(item, idx) => (
-                    <List.Item>
-                      <div class="previous-act" style={{ backgroundImage: 'url(' + item.img + ')' }}>
-                        <div class="previous-act-layer">
-                          <span class="previous-act-layer-text">{item.name}</span>
+                <Row>
+                  <List
+                    grid={{ gutter: 16, xs: 1, md: 4 }}
+                    dataSource={this.state.reviewActivities}
+                    renderItem={(item, idx) => (
+                      <List.Item>
+                        <div class="previous-act" style={{ backgroundImage: 'url(' + item.img + ')' }}>
+                          <div class="previous-act-layer">
+                            <span class="previous-act-layer-text">{item.name}</span>
+                          </div>
                         </div>
-                      </div>
-                    </List.Item>
-                  )}
-                />
-              </Row>
+                      </List.Item>
+                    )}
+                  />
+                </Row>
               </Card>
             </Content>
-            <Sider width="300" style={{ background: 'white'}}>
+            <Sider width="300" style={{ background: 'white' }}>
               <section class="vol-count-shower">
                 <NumberInfo
                   class="number-info"
@@ -279,7 +264,7 @@ class App extends Component {
                       <List.Item.Meta
                         avatar={<Avatar src={item.img} />}
                         title={<a href="https://ant.design">{item.name}</a>}
-                        description={'积分：' + item.score}
+                        description={'受助总人数：' + item.score}
                       />
                     </List.Item>
                   )}

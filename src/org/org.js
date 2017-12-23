@@ -84,7 +84,9 @@ class App extends Component {
                                 this.state.name
                             }
                             action={
-                                <Button type="primary">加入</Button>
+                                this.userStatus == 'NOT_JOIN' ?
+                                    (<Button type="primary">加入</Button>) :
+                                    (<span>您已加入该组织</span>)
                             }
                             content={
                                 <div>
@@ -114,29 +116,31 @@ class App extends Component {
                             }
                         />
                         <Card title="当前活动" bordered={false} style={{ marginTop: '24px' }}>
-                            <List
-                                grid={{ column: 3 }}
-                                dataSource={this.state.currentActivities}
-                                renderItem={(item, idx) => (
-                                    <List.Item style={{ alignItems: 'flex-start' }}>
-                                        <Card
-                                            hoverable
-                                            style={{ width: 240 }}
-                                            cover={<img alt="" src={item.img} />}
-                                        >
-                                            <Card.Meta
-                                                title={item.name}
-                                                description={
-                                                    <div>
-                                                        <p class="current-act-inform">活动时间：{item.time}</p>
-                                                        <p class="current-act-inform">活动地点：{item.location}</p>
-                                                    </div>
-                                                }
-                                            />
-                                        </Card>
-                                    </List.Item>
-                                )}
-                            />
+                            <Row>
+                                <List
+                                    grid={{ xs:1,md:3,gutter:16 }}
+                                    dataSource={this.state.currentActivities}
+                                    renderItem={(item, idx) => (
+                                        <List.Item style={{ alignItems: 'flex-start' }}>
+                                            <Card
+                                                hoverable
+                                                style={{ width: 240 }}
+                                                cover={<img alt="" src={item.img} />}
+                                            >
+                                                <Card.Meta
+                                                    title={item.name}
+                                                    description={
+                                                        <div>
+                                                            <p class="current-act-inform">活动时间：{item.time}</p>
+                                                            <p class="current-act-inform">活动地点：{item.location}</p>
+                                                        </div>
+                                                    }
+                                                />
+                                            </Card>
+                                        </List.Item>
+                                    )}
+                                />
+                            </Row>
                         </Card>
                         <Card title="往期活动" bordered={false} style={{ marginTop: '24px' }}>
                             <List
@@ -170,7 +174,7 @@ class App extends Component {
                                                     subTitle={<span>受助人数</span>}
                                                     total={numeral(item.recipientCount).format('0,0')}
                                                 />
-                                                <Rate disabled defaultValue={item.rate} style={{display:'inline-block',verticalAlign:'middle'}} />
+                                                <Rate disabled defaultValue={item.rate} style={{ display: 'inline-block', verticalAlign: 'middle' }} />
                                             </div>
                                         }
                                         body={

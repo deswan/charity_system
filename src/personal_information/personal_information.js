@@ -11,8 +11,6 @@ import Activity from './activity/activity';
 const { SubMenu } = Menu;
 const { Header, Content, Footer, Sider } = Layout;
 
-console.log(Profile)
-
 class PersonalInformation extends Component {
     constructor(props) {
         super(props);
@@ -39,25 +37,25 @@ class PersonalInformation extends Component {
                             <Sider width={200} style={{ background: '#fff' }}>
                                 <Menu
                                     mode="inline"
-                                    defaultSelectedKeys={['1']}
-                                    defaultOpenKeys={['sub1']}
+                                    selectedKeys={['1']}
+                                    defaultOpenKeys={['org-list']}
                                     style={{ height: '100%' }}
                                 >
-                                    <Menu.Item key="1">
+                                    <Menu.Item key="profile">
                                         <Icon type="pie-chart" />
-                                        <span><Link to="/profile">个人信息</Link></span>
+                                        <span>个人信息</span>
                                     </Menu.Item>
-                                    <Menu.Item key="2">
+                                    <Menu.Item key="activities">
                                         <Icon type="pie-chart" />
-                                        <span><Link to="/activities">我的活动</Link></span>
+                                        <span>我的活动</span>
                                     </Menu.Item>
-                                    <SubMenu key="3" title={<span><Icon type="user" />义工组织</span>}>
+                                    <SubMenu key="org-list" title={<span><Icon type="user" />义工组织</span>}>
                                         {
                                             this.state.orgs.map(item => {
                                                 return (
                                                     <Menu.Item key={item.id}>
-                                                        <Avatar src={item.img} size="small" />
-                                                        {item.name}
+                                                        <Avatar src={item.img} size="small" className="middle-avatar" />
+                                                        <span>{item.name}</span>
                                                     </Menu.Item>
                                                 )
                                             })

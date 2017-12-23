@@ -19,6 +19,7 @@ class Org extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            userStatus:'JOINED',
             id: 23,
             name: 'asdsda',
             img: require('../img/img.jpg'),
@@ -87,7 +88,7 @@ class Org extends Component {
                             <div style={{ margin: '20px 0' }}>
                                 {
                                     this.state.tags.map(item => {
-                                        return <Tag color="cyan" key={item.id}><a href="https://github.com/ant-design/ant-design/issues/1862">{item.name}</a></Tag>
+                                        return <Tag color="cyan" key={item.id}>{item.name}</Tag>
                                     })
                                 }
                             </div>
