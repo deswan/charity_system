@@ -99,7 +99,7 @@ class Profile extends Component {
                                                 {...formItemLayout}
                                             >
                                                 {getFieldDecorator('name', {
-                                                    rules: [{ max: 20, message: '不超过20个字符' }, { required: true, message: '不能为空' }],
+                                                    rules: [{ max: 30, message: '不超过20个字符' }, { required: true, message: '不能为空' }],
                                                 })(
                                                     <Input />
                                                     )}

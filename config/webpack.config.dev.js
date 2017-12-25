@@ -73,6 +73,11 @@ module.exports = {
       require.resolve('react-dev-utils/webpackHotDevClient'),
       paths.appSrc+'/login/login.js'
     ],
+    registry:[
+      require.resolve('./polyfills'),
+      require.resolve('react-dev-utils/webpackHotDevClient'),
+      paths.appSrc+'/registry/registry.js'
+    ],
     personal_information:[
       require.resolve('./polyfills'),
       require.resolve('react-dev-utils/webpackHotDevClient'),
@@ -267,6 +272,12 @@ module.exports = {
       chunks: ["login"],
       template: paths.appHtml,
       filename: 'login.html',
+    }),
+    new HtmlWebpackPlugin({
+      inject: true,
+      chunks: ["registry"],
+      template: paths.appHtml,
+      filename: 'registry.html',
     }),
     new HtmlWebpackPlugin({
       inject: true,
