@@ -9,6 +9,7 @@ import PageHeader from 'ant-design-pro/lib/PageHeader';
 import DescriptionList from 'ant-design-pro/lib/DescriptionList';
 import CHeader from '../components/CHeader/CHeader';
 import ActivitySource from '../components/ActivitySource/ActivitySource';
+import ActivityCard from '../components/ActivityCard/ActivityCard';
 import LargeDetailListItem from '../components/LargeDetailListItem/LargeDetailListItem';
 import numeral from 'numeral';
 const { Header, Content, Footer, Sider } = Layout;
@@ -118,25 +119,11 @@ class App extends Component {
                         <Card title="当前活动" bordered={false} style={{ marginTop: '24px' }}>
                             <Row>
                                 <List
-                                    grid={{ xs:1,md:3,gutter:16 }}
+                                    grid={{ xs:1,md:4,gutter:16 }}
                                     dataSource={this.state.currentActivities}
                                     renderItem={(item, idx) => (
                                         <List.Item style={{ alignItems: 'flex-start' }}>
-                                            <Card
-                                                hoverable
-                                                style={{ width: 240 }}
-                                                cover={<img alt="" src={item.img} />}
-                                            >
-                                                <Card.Meta
-                                                    title={item.name}
-                                                    description={
-                                                        <div>
-                                                            <p class="current-act-inform">活动时间：{item.time}</p>
-                                                            <p class="current-act-inform">活动地点：{item.location}</p>
-                                                        </div>
-                                                    }
-                                                />
-                                            </Card>
+                                                <ActivityCard onClick={this.handleOpen.bind(this,'activity/'+item.id)} img={item.img} name={item.name} time={item.time} location={item.location}/>
                                         </List.Item>
                                     )}
                                 />
@@ -147,12 +134,11 @@ class App extends Component {
                                 dataSource={this.state.previousActivities}
                                 renderItem={(item, idx) => (
                                     <LargeDetailListItem
-                                        siderWidth="400px"
+                                        siderWidth="200px"
                                         headmMinHeight="80px"
-                                        avatar={<Avatar src={item.userImg} />}
                                         head={
                                             <div>
-                                                <h4>{item.name}</h4>
+                                                <h2>{item.name}</h2>
                                                 <div>
                                                     {
                                                         item.tags.map(item => {
@@ -164,16 +150,6 @@ class App extends Component {
                                         }
                                         sider={
                                             <div>
-                                                <NumberInfo
-                                                    className="number-info"
-                                                    subTitle={<span>义工人数</span>}
-                                                    total={numeral(item.volunteerCount).format('0,0')}
-                                                />
-                                                <NumberInfo
-                                                    className="number-info"
-                                                    subTitle={<span>受助人数</span>}
-                                                    total={numeral(item.recipientCount).format('0,0')}
-                                                />
                                                 <Rate disabled defaultValue={item.rate} style={{ display: 'inline-block', verticalAlign: 'middle' }} />
                                             </div>
                                         }

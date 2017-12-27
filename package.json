@@ -98,5 +98,12 @@
   "eslintConfig": {
     "extends": "react-app"
   },
-  "proxy":"http://localhost:7001"
+  "proxy":{
+    "/api/*":{
+      "target": "http://localhost:7001"
+    },
+    "/public/*":{
+      "target": "http://localhost:7001"
+    }
+  }
 }
