@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Menu, Layout, Avatar, Dropdown, Icon } from 'antd';
+import { Menu, Layout, Avatar, Icon } from 'antd';
 import NoticeIcon from 'ant-design-pro/lib/NoticeIcon';
 import './CHeader.less';
 const SubMenu = Menu.SubMenu;
