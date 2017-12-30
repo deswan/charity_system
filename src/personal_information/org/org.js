@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import './org.less';
-import { Avatar, Form, Input, Button, Icon, Popover, Tabs, List, Row, Col, Badge, DatePicker, Divider, Select, PageHeader, Card, Tag, Rate } from 'antd';
+import { Avatar, Form, Input, Button, Icon, Popover, Tabs, List, Row, Col, Badge, DatePicker, Divider, Select, Card, Tag, Rate } from 'antd';
 import TagSelect from 'ant-design-pro/lib/TagSelect';
 import numeral from 'numeral';
 import NumberInfo from 'ant-design-pro/lib/NumberInfo';
 import PageHeader from 'ant-design-pro/lib/PageHeader';
 import DescriptionList from 'ant-design-pro/lib/DescriptionList';
-import LargeDetailListItem from '../components/LargeDetailListItem/LargeDetailListItem';
+import LargeDetailListItem from '../../components/LargeDetailListItem/LargeDetailListItem';
 let ACTIVITYS_STATUS = require('../../config.json').activity_status;
 const { Description } = DescriptionList;
 const { TabPane } = Tabs;
@@ -22,7 +22,7 @@ class Org extends Component {
             userStatus:'JOINED',
             id: 23,
             name: 'asdsda',
-            img: require('../img/img.jpg'),
+            img: require('../../img/img.jpg'),
             slogan: '123321',
             recipientCount: 12414,
             volunteerCount: 12323,
@@ -34,14 +34,14 @@ class Org extends Component {
                 {
                     id: 123,
                     name: '撒网群群二无',
-                    img: require('../img/img.jpg'),
+                    img: require('../../img/img.jpg'),
                     time: '1234-14-124',
                     location: 'asdsadsd'
                 },
                 {
                     id: 123,
                     name: '撒网群群二无',
-                    img: require('../img/img.jpg'),
+                    img: require('../../img/img.jpg'),
                     time: '1234-14-124',
                     location: 'asdsadsd'
                 }
@@ -55,14 +55,14 @@ class Org extends Component {
                         name: '爱老敬老'
                     }],
                     imgs: [
-                        require('../img/img.jpg'),
-                        require('../img/img.jpg'),
-                        require('../img/img.jpg'),
-                        require('../img/img.jpg'),
-                        require('../img/img.jpg'),
-                        require('../img/img.jpg'),
-                        require('../img/img.jpg'),
-                        require('../img/img.jpg'),
+                        require('../../img/img.jpg'),
+                        require('../../img/img.jpg'),
+                        require('../../img/img.jpg'),
+                        require('../../img/img.jpg'),
+                        require('../../img/img.jpg'),
+                        require('../../img/img.jpg'),
+                        require('../../img/img.jpg'),
+                        require('../../img/img.jpg'),
                     ],
                     volunteerCount: 123,
                     recipientCount: 12334,

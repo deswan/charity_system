@@ -8,6 +8,7 @@ import { Layout, Menu, Avatar, Icon } from 'antd';
 import CHeader from '../components/CHeader/CHeader';
 import Profile from './profile/profile';
 import Activity from './activity/activity';
+import Org from './org/org';
 const { SubMenu } = Menu;
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -25,7 +26,7 @@ class PersonalInformation extends Component {
         }
     }
     handleOpen = (page) => {
-        window.open('/' + page + '.html', '_self')
+        window.open('/' + page, '_self')
     }
     render() {
         return (
@@ -41,21 +42,27 @@ class PersonalInformation extends Component {
                                     defaultOpenKeys={['org-list']}
                                     style={{ height: '100%' }}
                                 >
-                                    <Menu.Item key="profile">
-                                        <Icon type="pie-chart" />
-                                        <span>个人信息</span>
+                                    <Menu.Item key="0">
+                                        <Link to="/profile">
+                                            <Icon type="pie-chart" />
+                                            <span>个人信息</span>
+                                        </Link>
                                     </Menu.Item>
-                                    <Menu.Item key="activities">
-                                        <Icon type="pie-chart" />
-                                        <span>我的活动</span>
+                                    <Menu.Item key="1">
+                                        <Link to="/activities">
+                                            <Icon type="pie-chart" />
+                                            <span>我的活动</span>
+                                        </Link>
                                     </Menu.Item>
                                     <SubMenu key="org-list" title={<span><Icon type="user" />义工组织</span>}>
                                         {
                                             this.state.orgs.map(item => {
                                                 return (
-                                                    <Menu.Item key={item.id}>
-                                                        <Avatar src={item.img} size="small" className="middle-avatar" />
-                                                        <span>{item.name}</span>
+                                                    <Menu.Item key="2">
+                                                        <Link to={`/org/${item.id}`}>
+                                                            <Avatar src={item.img} size="small" className="middle-avatar" />
+                                                            <span>{item.name}</span>
+                                                        </Link>
                                                     </Menu.Item>
                                                 )
                                             })
@@ -66,6 +73,7 @@ class PersonalInformation extends Component {
                             <Content style={{ padding: '0 24px', minHeight: 280 }}>
                                 <Route exact path='/profile' component={Profile} />
                                 <Route exact path='/activities' component={Activity} />
+                                <Route exact path='/org/:id' component={Org} />
                             </Content>
                         </Layout>
                     </Content>

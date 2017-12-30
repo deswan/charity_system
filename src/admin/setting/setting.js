@@ -194,7 +194,7 @@ class Setting extends Component {
                                         >
                                             {
                                                 this.state.typeList.map(type => {
-                                                    return <Option key={type.id}>{type.name}</Option>
+                                                    return <Option key={type.id} value={type.id}>{type.name}</Option>
                                                 })
                                             }
                                         </Select>

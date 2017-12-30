@@ -11,6 +11,7 @@ import VolunteerManage from './volunteer_manage/volunteer_manage';
 import CreateActivity from './create_activity/create_activity';
 import PageNotice from './notice/notice';
 import PageSetting from './setting/setting';
+import PageActivityDetail from './activity_detail/activity_detail';
 const { SubMenu } = Menu;
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -43,7 +44,8 @@ class Admin extends Component {
             <Router>
                 <Layout>
                     <Header>
-                        <div className="header-title"><span>义工组织管理</span>
+                        <div className="header-title">
+                            <span style={{marginRight:'20px'}}>义工组织管理</span>
                             <Avatar src={this.state.org.img} className="middle-avatar" /><span>{this.state.org.name}</span>
                         </div>
                         <Menu
@@ -82,13 +84,12 @@ class Admin extends Component {
                         </Menu>
                     </Header>
                     <Content>
-                        <Layout style={{ background: '#fff',height:'100%' }}>
-                            <Sider width={300} style={{ background: '#fff' }}>
+                        <Layout style={{ background: '#fff', height: '100%' }}>
+                            <Sider width={300}>
                                 <Menu
-                                
-                                    mode="inline"
+                                    mode="vertical"
                                     selectedKeys={['1']}
-                                    style={{ height: '100%' }}
+                                    style={{ height: '100%', position: 'fixed', width: '300px' }}
                                 >
                                     <Menu.Item key="1">
                                         <Link to="/activity-manage">
@@ -110,13 +111,13 @@ class Admin extends Component {
                                     </Menu.Item>
                                     <Menu.Item key="4">
                                         <Link to="/notice">
-                                           <Icon type="notification" />
+                                            <Icon type="notification" />
                                             <span>消息</span>
                                         </Link>
                                     </Menu.Item>
                                     <Menu.Item key="5">
                                         <Link to="/setting">
-                                           <Icon type="setting" />
+                                            <Icon type="setting" />
                                             <span>设置</span>
                                         </Link>
                                     </Menu.Item>
@@ -128,6 +129,7 @@ class Admin extends Component {
                                 <Route path="/create-activity" component={CreateActivity} />
                                 <Route path="/notice" component={PageNotice} />
                                 <Route path="/setting" component={PageSetting} />
+                                <Route path="/activity-detail/:id" component={PageActivityDetail} />
                             </Content>
                         </Layout>
                     </Content>
