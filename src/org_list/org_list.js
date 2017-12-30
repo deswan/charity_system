@@ -3,11 +3,12 @@ import ReactDOM from 'react-dom';
 import registerServiceWorker from '../registerServiceWorker';
 import React, { Component } from 'react';
 import './org_list.less';
-import { Layout, Menu, Card, List, Button, Avatar, Tag } from 'antd';
+import { Layout, Menu, Card, List, Button, Avatar, Tag,message } from 'antd';
 import NumberInfo from 'ant-design-pro/lib/NumberInfo';
 import TagSelect from 'ant-design-pro/lib/TagSelect';
 import CHeader from '../components/CHeader/CHeader';
 import numeral from 'numeral';
+import { req } from '../helper';
 const { Header, Content, Footer, Sider } = Layout;
 
 class OrgList extends Component {
@@ -71,7 +72,17 @@ class OrgList extends Component {
             }
         }
     }
-
+    componentWillMount = () => {
+        let id = parseInt(window.location.href.slice(window.location.href.lastIndexOf('/') + 1));
+        req({
+            url: '/api/getActivityById',
+            params: { id }
+        }).then((data) => {
+            this.setState(data)
+        }).catch((err) => {
+            message.error(err.message)
+        })
+    }
     handleTagChange = (checkedTags) => {
 
     }

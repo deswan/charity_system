@@ -74,6 +74,9 @@ class Org extends Component {
     handleOpen = (page) => {
         window.open('/' + page + '.html', '_self')
     }
+    componentWillMount = ()=>{
+        
+    }
     render() {
         return (
             <div className="c-org">

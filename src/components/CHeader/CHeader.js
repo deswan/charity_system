@@ -1,14 +1,18 @@
 import React, { Component } from 'react';
-import { Menu, Layout, Avatar, Icon } from 'antd';
+import { Menu, Layout, Avatar, Icon, message } from 'antd';
 import NoticeIcon from 'ant-design-pro/lib/NoticeIcon';
 import './CHeader.less';
+import { req } from '../../helper';
+
 const SubMenu = Menu.SubMenu;
 const { Header } = Layout;
 export default class CHeader extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            status: 0,
             user: {
+                id:0,
                 img: require('../../img/img.jpg'),
                 name: '红莲',
                 orgs: [
@@ -36,6 +40,24 @@ export default class CHeader extends Component {
                 ]
             }
         }
+    }
+    componentWillMount = () => {
+        req({
+            url:'/api/getUser'
+        }).then((data) => {
+            this.setState({ status: data.status })
+            if (data.status == 0) {
+                this.setState({
+                    user: {
+                        img:data.data.portrait,
+                        name:data.data.name,
+                        orgs:data.orgs
+                    },
+                })
+            }
+        }).catch(err => {
+            message.error(err.message)
+        })
     }
     handleOpen = ({ key }) => {
         if (key == 'notice') return;

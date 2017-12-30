@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import registerServiceWorker from '../registerServiceWorker';
 import React, { Component } from 'react';
 import './activity.less';
-import { Layout, Menu, Card, List, Button, Avatar, Tag, Row, Col, Badge, Rate, Divider, Form, Popover, Input } from 'antd';
+import { Layout, Menu, Card, List, Button, Avatar, Tag, Row, Col, Badge, Rate, Divider, Form, Popover, Input, message, Icon } from 'antd';
 import NumberInfo from 'ant-design-pro/lib/NumberInfo';
 import PageHeader from 'ant-design-pro/lib/PageHeader';
 import DescriptionList from 'ant-design-pro/lib/DescriptionList';
@@ -11,6 +11,8 @@ import CHeader from '../components/CHeader/CHeader';
 import ActivitySource from '../components/ActivitySource/ActivitySource';
 import LargeDetailListItem from '../components/LargeDetailListItem/LargeDetailListItem';
 import numeral from 'numeral';
+import { req } from '../helper';
+import { activity_status } from '../config';
 const { Header, Content, Footer, Sider } = Layout;
 const { Description } = DescriptionList;
 const FormItem = Form.Item;
@@ -25,54 +27,36 @@ class ActivityDetail extends Component {
             id: 23,
             name: 'asdsda',
             img: require('../img/img.jpg'),
-            tags: [{
-                id: 10,
-                name: '爱老敬老'
-            }],
-            status: '0',
-            time: '2017-10-17 11:11:12',
+            tags: [],
+            status: 0,
+            start_time: '2017-10-17 11:11:12',
             location: '广州市广东工业大学',
-            recipientCount: 123,
-            recruitCount: 3243,
+            recipient_number: 123,
+            recruit_number: 3243,
             joinedCount: 123,
             orgImg: require('../img/img.jpg'),
             orgName: '爱之花',
             orgSlogan: '啊啊啊啊啊啊啊啊啊啊啊啊啊啊',
             orgHelpedCount: 134432,
             create_time: '2017-10-17 11:11:12',
-            volunteers: [
-                {
-                    id: 123,
-                    img: require('../img/img.jpg'),
-                    name: '花花'
-                }
-            ],
-            sponsors: [
-                {
-                    id: 1,
-                    img: require('../img/img.jpg'),
-                    name: '恒大地产',
-                    money: 1234
-                }
-            ],
-            comments: [
-                {
-                    id: 1,
-                    userImg: require('../img/img.jpg'),
-                    imgs: [
-                        require('../img/img.jpg'),
-                        require('../img/img.jpg'),
-                    ],
-                    detail: '恒阿斯顿撒多撒多大地产',
-                    name: '花花',
-                    time: '1023-10-14',
-                    rate: 2
-                }
-            ]
+            volunteers: [],
+            sponsors: [],
+            comments: []
         }
     }
     handleOpen = (page) => {
         window.open('/' + page + '.html', '_self')
+    }
+    componentWillMount = () => {
+        let id = parseInt(window.location.href.slice(window.location.href.lastIndexOf('/') + 1));
+        req({
+            url: '/api/getActivityById',
+            params: { id }
+        }).then((data) => {
+            this.setState(data)
+        }).catch((err) => {
+            message.error(err.message)
+        })
     }
     handleJoinVisibleChange = (visible) => {
         this.setState({
@@ -89,39 +73,39 @@ class ActivityDetail extends Component {
         const formItemLayout = {
         };
         return (
-            <div class="activity-detail">
+            <div className="activity-detail">
                 <Layout >
                     <CHeader />
-                    <Content class="center-content">
+                    <Content className="center-content">
                         <div>
                             <PageHeader
                                 title={
                                     <div>
                                         {this.state.name}
-                                        <Badge style={{ marginLeft: '20px' }} status="success" text="进行中" />
+                                        <Badge style={{ marginLeft: '20px' }} status={activity_status[this.state.status].badge} text={activity_status[this.state.status].text} />
                                     </div>
                                 }
                                 action={
                                     <Popover
                                         content={
                                             this.state.userStatus == 'NOT_JOIN' ?
-                                            (<Form onSubmit={this.handleSubmit}>
-                                                <FormItem
-                                                    label="申请理由"
-                                                    {...formItemLayout}
-                                                >
-                                                    {getFieldDecorator('apply-text', {
-                                                        rules: [{ max: 300, message: '不超过300个字符' }, { required: true, message: '不能为空' }],
-                                                        placeholder: '不超过300个字符'
-                                                    })(
-                                                        <TextArea />
-                                                        )}
-                                                </FormItem>
-                                                <div style={{ textAlign: 'right' }}>
-                                                    <Button onClick={this.handleSubmitApply.bind(this)} type="primary" size="small">申请</Button>
-                                                </div>
-                                                    </Form>) :
-                                                    (<span>您还未加入 {this.state.orgName} ，<a onClick={this.handleOpen.bind(this,'org/'+this.orgId)}>现在加入</a></span>)
+                                                (<Form onSubmit={this.handleSubmit}>
+                                                    <FormItem
+                                                        label="申请理由"
+                                                        {...formItemLayout}
+                                                    >
+                                                        {getFieldDecorator('apply-text', {
+                                                            rules: [{ max: 300, message: '不超过300个字符' }, { required: true, message: '不能为空' }],
+                                                            placeholder: '不超过300个字符'
+                                                        })(
+                                                            <TextArea />
+                                                            )}
+                                                    </FormItem>
+                                                    <div style={{ textAlign: 'right' }}>
+                                                        <Button onClick={this.handleSubmitApply.bind(this)} type="primary" size="small">申请</Button>
+                                                    </div>
+                                                </Form>) :
+                                                (<span>您还未加入 {this.state.orgName} ，<a onClick={this.handleOpen.bind(this, 'org/' + this.orgId)}>现在加入</a></span>)
                                         }
                                         title="参与活动"
                                         placement="leftTop"
@@ -134,42 +118,35 @@ class ActivityDetail extends Component {
                                 }
                                 content={
                                     <div>
-                                        <DescriptionList col="2">
-                                            <Description term="活动时间">{this.state.time}</Description>
-                                            <Description term="活动地点">{this.state.location}</Description>
-                                            <Description term="受助人数">{this.state.recipientCount}</Description>
-                                            <Description term="招募义工人数">{this.state.recruitCount}</Description>
+                                        <DescriptionList col="1">
+                                            <Description term={
+                                                <span>
+                                                    <Icon type="team" /> 已招募义工数
+                                                </span>
+                                            }>{this.state.joinedCount}</Description>
                                         </DescriptionList>
                                         <div style={{ margin: '20px 0' }}>
                                             {
                                                 this.state.tags.map(item => {
-                                                    return <Tag color="cyan" key={item.id}>{item.name}</Tag>
+                                                    return <Tag color="cyan" key={item.tagId}>{item.tagName}</Tag>
                                                 })
                                             }
                                         </div>
-                                        <ActivitySource img={this.state.orgImg} orgName={this.state.orgName} time={this.state.create_time} onClick={this.handleOpen.bind(this, 'org/'+this.state.orgId)} />
                                     </div>
                                 }
                                 extraContent={
-                                    <div className="imgContainer">
-                                        <img alt="" src={this.state.img} />
-                                    </div>
+                                    <a>赞助</a>
                                 }
                             />
                             <Row gutter={32} style={{ marginTop: '24px' }}>
                                 <Col span={6}>
-                                    <Card title="爱之花公益组织">
-                                        <p className="org-card-text">{this.state.orgSlogan}</p>
+                                    <Card title="义工组织">
                                         <div>
                                             <Avatar src={this.state.orgImg} shape="square" size="large" className="org-card-img" />
                                             <div className="org-card-body">
-                                                <NumberInfo
-                                                    className="number-info"
-                                                    subTitle={<span>受助人数</span>}
-                                                    total={numeral(this.state.orgHelpedCount).format('0,0')}
-                                                />
+                                                {this.state.orgName}
+                                                <p className="org-card-text">{this.state.orgSlogan}</p>
                                             </div>
-                                            <Rate disabled defaultValue={2} />
                                         </div>
                                     </Card>
                                     <Card title="赞助商" style={{ marginTop: '20px' }}>
@@ -178,9 +155,9 @@ class ActivityDetail extends Component {
                                             renderItem={(item, idx) => (
                                                 <List.Item>
                                                     <List.Item.Meta
-                                                        avatar={<Avatar src={item.img} />}
+                                                        avatar={<Avatar src={item.logo} />}
                                                         title={item.name}
-                                                        description={'赞助总金额：' + numeral(item.money).format('0,0')}
+                                                        description={'赞助总金额：' + numeral(item.amount).format('0,0')}
                                                     />
                                                 </List.Item>
                                             )}
@@ -188,53 +165,73 @@ class ActivityDetail extends Component {
                                     </Card>
                                 </Col>
                                 <Col span={18}>
-                                    <Card title={`已参与（${this.state.joinedCount} / ${this.state.recruitCount}）`} bordered={false}>
-                                        <List
-                                            grid={{ column: 4 }}
-                                            dataSource={this.state.volunteers}
-                                            renderItem={(item, idx) => (
-                                                <List.Item>
-                                                    <Avatar src={item.img} className="single-list-item-avatar" />
-                                                    <a href="https://ant.design" className="single-list-item-text">{item.name}</a>
-                                                </List.Item>
-                                            )}
-                                        />
+                                    <Card title="活动详情" bordered={false}>
+                                        <Row gutter={16}>
+
+                                            <Col span={10}>
+                                                <DescriptionList col="1">
+                                                    <Description term={
+                                                        <span>
+                                                            <Icon type="environment-o" /> 活动时间
+                                                </span>
+                                                    }>{this.state.start_time} 至 {this.state.end_time}</Description>
+                                                    <Description term={
+                                                        <span>
+                                                            <Icon type="clock-circle-o" /> 活动地点
+                                                </span>
+                                                    }>{this.state.location}</Description>
+                                                    <Description term={
+                                                        <span>
+                                                            <Icon type="heart-o" /> 受助人数
+                                                </span>
+                                                    }>{this.state.recipient_number}</Description>
+                                                </DescriptionList>
+                                            </Col>
+                                            <Col span={14}>
+                                                <div className="imgContainer">
+                                                    <img alt="" src={this.state.img} />
+                                                </div>
+                                            </Col>
+                                        </Row>
                                     </Card>
-                                    <Card title="评价" bordered={false}>
-                                        <List
-                                            dataSource={this.state.comments}
-                                            renderItem={(item, idx) => (
-                                                <LargeDetailListItem
-                                                    avatar={<Avatar src={item.userImg} />}
-                                                    head={
-                                                        <div>
-                                                            <h4>{item.name}</h4>
-                                                            <p>{item.detail}</p>
-                                                        </div>
-                                                    }
-                                                    sider={
-                                                        <div>
-                                                            <Rate disabled defaultValue={item.rate} />
-                                                            <p class="comment-sider-text">{item.time}</p>
-                                                        </div>
-                                                    }
-                                                    body={
-                                                        <div>
-                                                            {
-                                                                item.imgs.map(img => {
-                                                                    return (
-                                                                        <div className="comment-imgContainer">
-                                                                            <img src={img} alt="" />
-                                                                        </div>
-                                                                    )
-                                                                })
-                                                            }
-                                                        </div>
-                                                    }
-                                                />
-                                            )}
-                                        />
-                                    </Card>
+                                    {
+                                        this.state.status == 3 &&
+                                        <Card title="评价" bordered={false}>
+                                            <List
+                                                dataSource={this.state.comments}
+                                                renderItem={(item, idx) => (
+                                                    <LargeDetailListItem
+                                                        avatar={<Avatar src={item.userImg} />}
+                                                        head={
+                                                            <div>
+                                                                <h4>{item.name}</h4>
+                                                                <p>{item.detail}</p>
+                                                            </div>
+                                                        }
+                                                        sider={
+                                                            <div>
+                                                                <Rate disabled defaultValue={item.rate} />
+                                                                <p className="comment-sider-text">{item.time}</p>
+                                                            </div>
+                                                        }
+                                                        body={
+                                                            <div>
+                                                                {
+                                                                    item.imgs.map((img, idx) => {
+                                                                        return (
+                                                                            <div className="comment-imgContainer" key={idx}>
+                                                                                <img src={img} alt="" />
+                                                                            </div>
+                                                                        )
+                                                                    })
+                                                                }
+                                                            </div>
+                                                        }
+                                                    />
+                                                )}
+                                            />
+                                        </Card>
+                                    }
                                 </Col>
                             </Row>
                         </div>
