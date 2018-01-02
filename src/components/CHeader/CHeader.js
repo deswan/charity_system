@@ -55,6 +55,7 @@ export default class CHeader extends Component {
                     },
                 })
             }
+            this.props.userLoaded && this.props.userLoaded(data);
         }).catch(err => {
             message.error(err.message)
         })
@@ -63,12 +64,9 @@ export default class CHeader extends Component {
         if (key == 'notice') return;
         window.open('/' + key, '_self')
     }
-    handlePerson = ({ key }) => {
-
-    }
     render() {
         return (
-            <Header className="c-header">
+            <Header className="c-header" style={{opacity:0.9}}>
                 <div className="header-title">公益活动管理系统</div>
                 <Menu
                     mode="horizontal"
@@ -80,7 +78,7 @@ export default class CHeader extends Component {
                     <Menu.Item key="index">公益活动</Menu.Item>
                     <Menu.Item key="org_list">义工组织</Menu.Item>
                     {
-                        this.state.user == null ?
+                        this.state.status == 1 ?
                             (<Menu.Item key="login" style={{ float: 'right' }}>登陆</Menu.Item>) :
                             (
                                 <SubMenu style={{ float: 'right' }} className="header-submenu" title={
@@ -101,7 +99,7 @@ export default class CHeader extends Component {
                                         {
                                             this.state.user.orgs.map(item => {
                                                 return (
-                                                    <Menu.Item key={item.id}>
+                                                    <Menu.Item key={'personal_information/#/org/'+item.id}>
                                                         <Avatar src={item.img} size="small" className="middle-avatar" />
                                                         <span>{item.name}</span>
                                                     </Menu.Item>
@@ -109,6 +107,10 @@ export default class CHeader extends Component {
                                             })
                                         }
                                     </SubMenu>
+                                    <Menu.Item key="logout">
+                                        <Icon type="logout" />
+                                        <span>退出</span>
+                                    </Menu.Item>
                                 </SubMenu>
                             )
                     }

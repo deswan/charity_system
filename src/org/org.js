@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import registerServiceWorker from '../registerServiceWorker';
 import React, { Component } from 'react';
 import './org.less';
-import { Layout, Menu, Card, List, Button, Avatar, Tag, Row, Col, Badge, Rate } from 'antd';
+import { Layout, Menu, Card, List, Button, Avatar, Tag, Row, Col, Badge, Rate,message } from 'antd';
 import NumberInfo from 'ant-design-pro/lib/NumberInfo';
 import PageHeader from 'ant-design-pro/lib/PageHeader';
 import DescriptionList from 'ant-design-pro/lib/DescriptionList';
@@ -12,6 +12,8 @@ import ActivitySource from '../components/ActivitySource/ActivitySource';
 import ActivityCard from '../components/ActivityCard/ActivityCard';
 import LargeDetailListItem from '../components/LargeDetailListItem/LargeDetailListItem';
 import numeral from 'numeral';
+import { req } from '../helper';
+
 const { Header, Content, Footer, Sider } = Layout;
 const { Description } = DescriptionList;
 
@@ -20,72 +22,45 @@ class App extends Component {
         super(props);
         this.state = {
             id: 23,
+            userStatus:'',
             name: 'asdsda',
             img: require('../img/img.jpg'),
             slogan: '123321',
             recipientCount: 12414,
             volunteerCount: 12323,
-            tags: [{
-                id: 10,
-                name: '爱老敬老'
-            }],
-            currentActivities: [
-                {
-                    id: 123,
-                    name: '撒网群群二无',
-                    img: require('../img/img.jpg'),
-                    time: '1234-14-124',
-                    location: 'asdsadsd'
-                },
-                {
-                    id: 123,
-                    name: '撒网群群二无',
-                    img: require('../img/img.jpg'),
-                    time: '1234-14-124',
-                    location: 'asdsadsd'
-                }
-            ],
-            previousActivities: [
-                {
-                    id: 123,
-                    name: '123',
-                    tags: [{
-                        id: 10,
-                        name: '爱老敬老'
-                    }],
-                    imgs: [
-                        require('../img/img.jpg'),
-                        require('../img/img.jpg'),
-                        require('../img/img.jpg'),
-                        require('../img/img.jpg'),
-                        require('../img/img.jpg'),
-                        require('../img/img.jpg'),
-                        require('../img/img.jpg'),
-                        require('../img/img.jpg'),
-                    ],
-                    volunteerCount: 123,
-                    recipientCount: 12334,
-                    rate: 4
-                }
-            ]
+            tags: [],
+            currentActivities: [],
+            previousActivities: []
         }
     }
+    componentWillMount = () => {
+        let id = parseInt(window.location.href.slice(window.location.href.lastIndexOf('/') + 1));
+        req({
+            url: '/api/getOrgById',
+            params: { id }
+        }).then((data) => {
+            this.setState(data)
+        }).catch((err) => {
+            message.error(err.message)
+        })
+    }
     handleOpen = (page) => {
-        window.open('/' + page + '.html', '_self')
+        window.open('/' + page, '_self')
     }
     render() {
         return (
-            <div class="org-detail">
+            <div className="org-detail">
                 <Layout>
                     <CHeader />
-                    <Content class="center-content">
+                    <Content className="center-content">
                         <PageHeader
-                            logo={<img alt="" src={this.state.img} />}
+                            logo={<img alt="" src={this.state.logo} />}
                             title={
                                 this.state.name
                             }
                             action={
-                                this.userStatus == 'NOT_JOIN' ?
+                                this.state.userStatus == 'NO_LOGIN' ? '' :
+                                this.state.userStatus == 'NO_JOIN' ?
                                     (<Button type="primary">加入</Button>) :
                                     (<span>您已加入该组织</span>)
                             }
@@ -95,7 +70,7 @@ class App extends Component {
                                     <div style={{ margin: '20px 0' }}>
                                         {
                                             this.state.tags.map(item => {
-                                                return <Tag color="cyan" key={item.id}><a href="https://github.com/ant-design/ant-design/issues/1862">{item.name}</a></Tag>
+                                                return <Tag color="cyan" key={item.tagId}><span>{item.tagName}</span></Tag>
                                             })
                                         }
                                     </div>
@@ -106,12 +81,12 @@ class App extends Component {
                                     <NumberInfo
                                         className="number-info"
                                         subTitle={<span>义工人数</span>}
-                                        total={numeral(this.state.volunteerCount).format('0,0')}
+                                        total={numeral(this.state.vol_count).format('0,0')}
                                     />
                                     <NumberInfo
                                         className="number-info"
                                         subTitle={<span>受助人数</span>}
-                                        total={numeral(this.state.recipientCount).format('0,0')}
+                                        total={numeral(this.state.recipient_count).format('0,0')}
                                     />
                                 </div>
                             }
@@ -120,10 +95,10 @@ class App extends Component {
                             <Row>
                                 <List
                                     grid={{ xs:1,md:4,gutter:16 }}
-                                    dataSource={this.state.currentActivities}
+                                    dataSource={this.state.currentActs}
                                     renderItem={(item, idx) => (
                                         <List.Item style={{ alignItems: 'flex-start' }}>
-                                                <ActivityCard onClick={this.handleOpen.bind(this,'activity/'+item.id)} img={item.img} name={item.name} time={item.time} location={item.location}/>
+                                                <ActivityCard onClick={this.handleOpen.bind(this,'activity/'+item.id)} img={item.img} name={item.name} time={item.start_time} location={item.location}/>
                                         </List.Item>
                                     )}
                                 />
@@ -131,7 +106,7 @@ class App extends Component {
                         </Card>
                         <Card title="往期活动" bordered={false} style={{ marginTop: '24px' }}>
                             <List
-                                dataSource={this.state.previousActivities}
+                                dataSource={this.state.previousActs}
                                 renderItem={(item, idx) => (
                                     <LargeDetailListItem
                                         siderWidth="200px"
@@ -142,7 +117,7 @@ class App extends Component {
                                                 <div>
                                                     {
                                                         item.tags.map(item => {
-                                                            return <Tag color="cyan" key={item.id}><a href="https://github.com/ant-design/ant-design/issues/1862">{item.name}</a></Tag>
+                                                            return <Tag color="cyan" key={item.tagId}><span>{item.tagName}</span></Tag>
                                                         })
                                                     }
                                                 </div>
@@ -156,7 +131,8 @@ class App extends Component {
                                         body={
                                             <div>
                                                 {
-                                                    item.imgs.map(img => {
+                                                    item.photos &&
+                                                    item.photos.map(img => {
                                                         return (
                                                             <div className="comment-imgContainer">
                                                                 <img src={img} alt="" />

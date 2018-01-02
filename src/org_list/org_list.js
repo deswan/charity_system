@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import registerServiceWorker from '../registerServiceWorker';
 import React, { Component } from 'react';
 import './org_list.less';
-import { Layout, Menu, Card, List, Button, Avatar, Tag,message } from 'antd';
+import { Layout, Menu, Card, List, Button, Avatar, Tag, message } from 'antd';
 import NumberInfo from 'ant-design-pro/lib/NumberInfo';
 import TagSelect from 'ant-design-pro/lib/TagSelect';
 import CHeader from '../components/CHeader/CHeader';
@@ -15,92 +15,73 @@ class OrgList extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            tags: [{
-                id: '1',
-                name: '123'
-            }, {
-                id: '1',
-                name: '123'
-            }],
-            orgs: [
-                {
-                    img: require('../img/img.jpg'),
-                    name: '爱之花公益团队',
-                    slogan: '一段假想的简介，这是一段比较长的简介',
-                    volunteerCount: 8846,
-                    activityCount: 12346,
-                    tags: [{
-                        id: 10,
-                        name: '爱老敬老'
-                    }, {
-                        id: 11,
-                        name: '爱老敬老'
-                    }]
-                },
-                {
-                    img: require('../img/img.jpg'),
-                    name: '爱之花公益团队',
-                    slogan: '一段假想的简介，这是一段比较长的简介',
-                    volunteerCount: 8846,
-                    activityCount: 12346,
-                    tags: [{
-                        id: 10,
-                        name: '爱老敬老'
-                    }]
-                },
-                {
-                    img: require('../img/img.jpg'),
-                    name: '爱之花公益团队',
-                    slogan: '一段假想的简介，这是一段比较长的简介',
-                    volunteerCount: 8846,
-                    recipientCount: 12346,
-                    tags: [{
-                        id: 10,
-                        name: '爱老敬老'
-                    }]
-                }
-            ],
+            checkedTags: [],
+            tags: [],
+            orgs: [],
             pagination: {
-                pageSize: 10,
+                pageSize: 15,
                 current: 1,
-                total: 100,
+                total: 0,
                 onChange: ((page) => {
                     let pagination = this.state.pagination;
                     pagination.current = page;
-                    this.setState({ pagination })
+                    this.setState({ pagination });
+                    setTimeout(this.getData.bind(this), 0);
                 }),
             }
         }
     }
     componentWillMount = () => {
-        let id = parseInt(window.location.href.slice(window.location.href.lastIndexOf('/') + 1));
         req({
-            url: '/api/getActivityById',
-            params: { id }
+            url: '/api/getOrgTags'
         }).then((data) => {
-            this.setState(data)
+            this.setState({
+                tags: data
+            })
+        }).catch((err) => {
+            message.error(err.message)
+        })
+        this.getData();
+    }
+
+    handleTagChange = (checkedTags) => {
+        this.setState({ checkedTags })
+        setTimeout(this.getData.bind(this), 0);
+    }
+
+    getData = () => {
+        req({
+            url: '/api/getOrgList',
+            params: {
+                page: this.state.pagination.current,
+                tag: this.state.checkedTags.join(',')
+            }
+        }).then((data) => {
+            let pagination = this.state.pagination;
+            pagination.total = data.total;
+            this.setState({
+                orgs: data.rows,
+                pagination
+            })
         }).catch((err) => {
             message.error(err.message)
         })
     }
-    handleTagChange = (checkedTags) => {
-
-    }
 
     handleOpen = (page) => {
-        window.open('/' + page + '.html', '_self')
-      }
+        window.open('/' + page, '_self')
+    }
 
     render() {
         return (
-            <div class="org-list">
+            <div className="org-list">
                 <Layout style={{ background: 'white' }}>
                     <CHeader pageName="org_list" />
                     <Content className="content">
                         <TagSelect onChange={this.handleTagChange} expandable style={{ marginBottom: '20px' }}>
                             {
                                 this.state.tags.map(item => {
-                                    return <TagSelect.Option  value={item.id}>{item.name}</TagSelect.Option>
+                                    return <TagSelect.Option value={item.id} key={item.id}>{item.name}</TagSelect.Option>
                                 })
                             }
                         </TagSelect>
@@ -110,25 +91,25 @@ class OrgList extends Component {
                             renderItem={(item, idx) => (
                                 <List.Item key={idx}>
                                     <List.Item.Meta
-                                        avatar={<Avatar src={item.img} />}
-                                        title={<a onClick={this.handleOpen.bind(this,'org_detail')}>{item.name}</a>}
+                                        avatar={<Avatar src={item.logo} />}
+                                        title={<a onClick={this.handleOpen.bind(this, 'org/'+item.id)}>{item.name}</a>}
                                         description={item.slogan}
                                     />
                                     <div style={{ flex: 1, paddingLeft: '20px' }}>
                                         {
                                             item.tags.map(item => {
-                                                return <Tag color="cyan" key={item.id}><a href="https://github.com/ant-design/ant-design/issues/1862">{item.name}</a></Tag>
+                                                return <Tag color="cyan" key={item.tagId}><a href="https://github.com/ant-design/ant-design/issues/1862">{item.tagName}</a></Tag>
                                             })
                                         }
                                     </div>
                                     <NumberInfo
                                         subTitle={<span>义工人数</span>}
-                                        total={numeral(item.volunteerCount).format('0,0')}
+                                        total={numeral(item.vol_count).format('0,0')}
                                     />
                                     <NumberInfo
                                         style={{ marginLeft: '30px' }}
                                         subTitle={<span>受助人数</span>}
-                                        total={numeral(item.activityCount).format('0,0')}
+                                        total={numeral(item.recipient_count).format('0,0')}
                                     />
                                 </List.Item>
                             )}

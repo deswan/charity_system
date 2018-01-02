@@ -16,23 +16,22 @@ class PersonalInformation extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            orgs: [
-                {
-                    id: 1,
-                    name: '爱之花',
-                    img: require('../img/img.jpg')
-                }
-            ]
+            orgs: []
         }
     }
     handleOpen = (page) => {
         window.open('/' + page, '_self')
     }
+    getUser = data => {
+        this.setState({
+            orgs:data.orgs
+        })
+    }
     render() {
         return (
             <Router>
                 <Layout>
-                    <CHeader />
+                    <CHeader userLoaded={this.getUser} />
                     <Content style={{ padding: '24px 50px' }}>
                         <Layout style={{ padding: '24px 0', background: '#fff' }}>
                             <Sider width={200} style={{ background: '#fff' }}>
