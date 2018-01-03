@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import './activity_manage.less';
-import { Button, Avatar, Row, Col, Form, Input, Radio, DatePicker, Tag, Badge, Table, Divider, Pagination } from 'antd';
+import { Button, Avatar, Row, Col, Form, Input, Radio, DatePicker, Tag, Badge, Table, Divider, Pagination, message, Select } from 'antd';
 import numeral from 'numeral';
 import { activity_status } from '../../config';
 import DescriptionList from 'ant-design-pro/lib/DescriptionList';
+import { req } from '../../helper';
 const { Description } = DescriptionList;
 const FormItem = Form.Item;
-const RadioGroup = Radio.Group;
+const Option = Select.Option;
 const RangePicker = DatePicker.RangePicker;
 
 
@@ -14,50 +15,98 @@ class ActivityManage extends Component {
     constructor(props) {
         super(props);
         this.state = {
-
+            id: 0,
+            loading: false,
+            form: {
+                name: '',
+                startTime: '',
+                endTime: '',
+                status: -1
+            },
+            activities: [],
+            pagination: {
+                pageSize: 10,
+                current: 1,
+                total: 0,
+                onChange: ((page) => {
+                    let pagination = this.state.pagination;
+                    pagination.current = page;
+                    this.setState({ pagination });
+                    setTimeout(this.getActData.bind(this), 0);
+                }),
+            }
         }
     }
     handleOpen = (page) => {
         window.open('/' + page, '_self')
     }
     componentWillMount() {
-        // fetch('/api/').then((res)=>{
-        //   console.log(res)
-        // })
+        let path = window.location.href.slice(0, window.location.href.lastIndexOf('#'));
+        let id = parseInt(path.slice(path.lastIndexOf('/') + 1));
+        console.log(id)
+        this.setState({ id }, this.getActData)
+    }
+    getActData = () => {
+        let form = this.state.form;
+        this.setState({
+            loading: true
+        })
+        req({
+            url: '/api/getActListBelongToOrg',
+            params: {
+                orgId: this.state.id,
+                startTime: form.startTime,
+                endTime: form.endTime,
+                name: form.name,
+                status: form.status,
+                page: this.state.pagination.current
+            }
+        }).then((data) => {
+            let pagination = this.state.pagination;
+            pagination.total = data.total;
+            this.setState({
+                activities: data.rows,
+                pagination,
+                loading: false
+            })
+        }).catch((err) => {
+            message.error(err.message);
+            this.setState({
+                loading: false
+            })
+        })
     }
     handleSearch = () => {
-
+        this.setState((state) => {
+            state.pagination.current = 1;
+            return state;
+        }, this.getActData)
     }
     handleReset = () => {
-
+        this.props.form.setFieldsValue({
+            name: '',
+            date: '',
+            status: -1
+        })
+        this.setState((state) => {
+            state.pagination.current = 1;
+            state.form = {
+                name: '',
+                startTime: '',
+                endTime: '',
+                status: -1
+            }
+            return state;
+        }, this.getActData)
     }
-    onStatusChange = () => {
-
-    }
-    onDateChange = () => {
-
+    onStatusChange = (val) => {
+        this.setState((state) => {
+            state.form.status = val;
+            return state;
+        }, this.getActData);
     }
     render() {
         const { getFieldDecorator } = this.props.form;
-        const data = [{
-            id: '1',
-            name: 'John Brown',
-            create_time: 'John Brown',
-            start_time: 'John start_time',
-            end_time: 'John end_time',
-            location: 'John location',
-            tags: [
-                {
-                    id: 1,
-                    name: 'tag1'
-                }
-            ],
-            recruit_number: 111,
-            recipient_number: 222,
-            score_count: 333,
-            status: 0,
-            sponsor_count: 123
-        }];
         return (
             <div>
                 <Form
@@ -68,12 +117,23 @@ class ActivityManage extends Component {
                 >
                     <FormItem label="名称" >
                         {getFieldDecorator('name')(
-                            <Input />
+                            <Input onChange={(e) => {
+                                this.setState((state) => {
+                                    state.form.name = this.props.form.getFieldValue('name');
+                                    return state;
+                                })
+                            }} />
                         )}
                     </FormItem>
                     <FormItem label="日期" >
                         {getFieldDecorator('date')(
-                            <RangePicker onChange={this.onDateChange} />
+                            <RangePicker onChange={($, [date1, date2]) => {
+                                this.setState((state) => {
+                                    state.form.startTime = date1;
+                                    state.form.endTime = date2;
+                                    return state;
+                                })
+                            }} />
                         )}
                     </FormItem>
                     <Button style={{ marginLeft: 8 }} onClick={this.handleSearch} type="primary">查询</Button>
@@ -82,22 +142,21 @@ class ActivityManage extends Component {
                         <FormItem label="状态"
                         >
                             {getFieldDecorator('status', {
-                                initialValue: '0'
+                                initialValue: -1
                             })(
-                                <RadioGroup onChange={this.onStatusChange}>
-                                    {
-                                        Object.keys(activity_status).map(key => {
-                                            return (
-                                                <Radio value={key}>{activity_status[key].text}</Radio>
-                                            )
-                                        })
-                                    }
-                                </RadioGroup>
+                                <Select style={{ width: 120 }} onChange={this.onStatusChange}>
+                                    <Option value={-1}>全部</Option>
+                                    {Object.keys(activity_status).map(key => {
+                                        return (
+                                            <Option value={key} key={key}>{activity_status[key].text}</Option>
+                                        )
+                                    })}
+                                </Select>
                                 )}
                         </FormItem>
                     </div>
                 </Form>
-                <Table columns={[{
+                <Table loading={this.state.loading} rowKey="id" columns={[{
                     title: '活动名称',
                     width: '150px',
                     dataIndex: 'name',
@@ -117,7 +176,7 @@ class ActivityManage extends Component {
                 }, {
                     title: '义工数',
                     width: '100px',
-                    dataIndex: 'recruit_number'
+                    dataIndex: 'vol_count'
                 }, {
                     title: '状态',
                     width: '100px',
@@ -134,23 +193,21 @@ class ActivityManage extends Component {
                             <a href="#">取消活动</a>
                         </span>
                     ),
-                }]} dataSource={data}
+                }]} dataSource={this.state.activities}
                     expandedRowRender={record => <p style={{ margin: 0 }}>
                         <DescriptionList size="small">
                             <Description term="创建时间">{record.create_time}</Description>
                             <Description term="受助人数">{record.recipient_number}</Description>
-                            <Description term="赞助金额">{record.sponsor_count}</Description>
+                            <Description term="赞助金额">{record.sponsor_amount}</Description>
                             <Description term="评价数">{record.score_count}</Description>
                             <Description term="类型">{
                                 record.tags.map(item => {
-                                    return <Tag color="cyan" key={item.id}>{item.name}</Tag>
+                                    return <Tag color="cyan" key={item.tagId}>{item.tagName}</Tag>
                                 })
                             }</Description>
                         </DescriptionList>
                     </p>}
-                    pagination={
-                        <Pagination defaultCurrent={6} total={500} />
-                    } />
+                    pagination={this.state.pagination} />
             </div>
         );
     }

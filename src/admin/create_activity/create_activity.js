@@ -22,11 +22,6 @@ class CreateActivity extends Component {
     handleOpen = (page) => {
         window.open('/' + page, '_self')
     }
-    componentWillMount() {
-        // fetch('/api/').then((res)=>{
-        //   console.log(res)
-        // })
-    }
     handleSubmit = (e) => {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {

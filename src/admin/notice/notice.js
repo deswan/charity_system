@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import './notice.less';
-import { Button, Avatar, Row, Col, Divider, List } from 'antd';
+import { Button, Avatar, Row, Col, Divider, List,message } from 'antd';
 import numeral from 'numeral';
 import { activity_status } from '../../config';
+import { req } from '../../helper';
 
 class Notice extends Component {
     constructor(props) {
@@ -38,9 +39,30 @@ class Notice extends Component {
         window.open('/' + page, '_self')
     }
     componentWillMount() {
-        // fetch('/api/').then((res)=>{
-        //   console.log(res)
-        // })
+        let path = window.location.href.slice(0, window.location.href.lastIndexOf('#'));
+        let id = parseInt(path.slice(path.lastIndexOf('/') + 1));
+        console.log(id)
+        this.setState({ id }, this.getData)
+        let form = this.state.form;
+        this.setState({
+            loading: true
+        })
+        req({
+            url: '/api/getTodos',
+            params: {
+                orgId: id,
+            }
+        }).then((data) => {
+            this.setState({
+                data,
+                loading: false
+            })
+        }).catch((err) => {
+            message.error(err.message);
+            this.setState({
+                loading: false
+            })
+        })
     }
     render() {
         return (
