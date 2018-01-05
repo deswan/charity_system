@@ -124,7 +124,7 @@ class Admin extends Component {
                                 </Menu>
                             </Sider>
                             <Content style={{ padding: '0 24px', minHeight: 400 }}>
-                                <Route path="/activity-manage" component={ActivityManage} />
+                                <Route path="/activity-manage" component={ActivityManage} a={3} />
                                 <Route path="/volunteer-manage" component={VolunteerManage} />
                                 <Route path="/create-activity" component={CreateActivity} />
                                 <Route path="/notice" component={PageNotice} />

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import './create_activity.less';
 import { Button, Avatar, Row, Col, Form, Input, DatePicker, Upload, InputNumber, Select, message, Icon } from 'antd';
+import { req } from '../../helper';
 const FormItem = Form.Item;
 const RangePicker = DatePicker.RangePicker;
 const Option = Select.Option;
@@ -9,14 +10,10 @@ class CreateActivity extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            id:0,
             isAvatarUploading: false,
             avatarUrl: "",
-            typeList: [
-                {
-                    id: 1,
-                    name: 'tag1'
-                }
-            ]
+            typeList: []
         }
     }
     handleOpen = (page) => {
@@ -27,16 +24,61 @@ class CreateActivity extends Component {
         this.props.form.validateFields((err, values) => {
             if (!err) {
                 console.log(values);
+                req({
+                    url: '/api/createAct',
+                    type:'post',
+                    params: {
+                        orgId: this.state.id,
+                        startDate: values.date[0].format('YYYY-MM-DD'),
+                        endDate: values.date[0].format('YYYY-MM-DD'),
+                        name: values.name,
+                        avatar: this.state.avatarUrl,
+                        location: values.location,
+                        recipient_number: values.recipient_number,
+                        tags: values.tags.join(',')
+                    }
+                }).then((data) => {
+                    message.success('添加成功');
+                    this.props.history.push('/activity-manage')
+                }).catch((err) => {
+                    message.error(err.message);
+                })
             }
         });
     }
+    beforeUpload(file) {
+        this.setState({
+            isAvatarUploading:true
+        })
+      }
     handleUploadChange = ({ file, fileList, event }) => {
         if (file.status == 'done') {
             message.success('上传成功');
-
+            this.setState({
+                avatarUrl:file.response,
+                isAvatarUploading:false
+            })
         } else if (file.status == 'error') {
             message.error('上传失败');
+            this.setState({
+                isAvatarUploading:false
+            })
         }
+    }
+    componentWillMount() {
+        let path = window.location.href.slice(0, window.location.href.lastIndexOf('#'));
+        let id = parseInt(path.slice(path.lastIndexOf('/') + 1));
+        console.log(id)
+        this.setState({id})
+        req({
+            url: '/api/getAllTags'
+        }).then((data) => {
+            this.setState({
+                typeList:data
+            })
+        }).catch((err) => {
+            message.error(err.message);
+        })
     }
     render() {
         const { getFieldDecorator } = this.props.form;
@@ -64,7 +106,7 @@ class CreateActivity extends Component {
         );
         return (
             <div>
-                <Form onSubmit={this.handleSubmit}>
+                <Form onSubmit={this.handleSubmit} style={{marginTop:'20px'}}>
                     <FormItem
                         {...formItemLayout}
                         label="头像">
@@ -76,6 +118,7 @@ class CreateActivity extends Component {
                                 showUploadList={false}
                                 action="/api/uploadPhoto"
                                 onChange={this.handleUploadChange}
+                                beforeUpload={this.beforeUpload}
                             >
                                 {this.state.avatarUrl ? <img src={this.state.avatarUrl} alt="" /> : uploadButton}
                             </Upload>
@@ -121,7 +164,10 @@ class CreateActivity extends Component {
                             rules: [{ required: true ,message:'请填写活动类型'}]
                         })(
                             <Select
-                                mode="tags"
+                                showSearch
+                                mode="multiple"
+                                filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
+                                optionFilterProp="children"
                                 // style={{ width: '100%' }}
                                 placeholder="请选择类型"
                             >
