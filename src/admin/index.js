@@ -85,11 +85,11 @@ class Admin extends Component {
                     </Header>
                     <Content>
                         <Layout style={{ background: '#fff', height: '100%' }}>
-                            <Sider width={300}>
+                            <Sider width={300} style={{backgroundColor:'white' }}>
                                 <Menu
                                     mode="vertical"
                                     selectedKeys={['1']}
-                                    style={{ height: '100%', position: 'fixed', width: '300px' }}
+                                    style={{ height: '100%', position: 'fixed', width: '300px'}}
                                 >
                                     <Menu.Item key="1">
                                         <Link to="/activity-manage">

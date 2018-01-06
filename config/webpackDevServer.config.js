@@ -91,7 +91,9 @@ module.exports = function(proxy, allowedHost) {
         { from: /^\/login/, to: '/login.html' },
         { from: /^\/registry/, to: '/registry.html' },
         { from: /^\/personal_information/, to: '/personal_information.html' },
-        { from: /^\/admin/, to: '/admin.html' }
+        { from: /^\/admin/, to: '/admin.html' },
+        { from: /^\/createorg/, to: '/createorg.html' },
+        { from: /^\/sponsor/, to: '/sponsor.html' }
       ]
     },
     public: allowedHost,

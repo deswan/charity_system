@@ -64,6 +64,9 @@ class Notice extends Component {
             })
         })
     }
+    handleAgree = (id)=>{
+
+    }
     render() {
         return (
             <div>
@@ -72,7 +75,7 @@ class Notice extends Component {
                     itemLayout="horizontal"
                     dataSource={this.state.data}
                     renderItem={item => (
-                        <List.Item actions={[<Button>同意</Button>, <Button>拒绝</Button>]}>
+                        <List.Item actions={[<Button onClick={this}>同意</Button>, <Button>拒绝</Button>]}>
                             <List.Item.Meta
                                 avatar={<Avatar src={(item.type == 0 || item.type == 1) ? item.user.img : item.sponsor.img} />}
                                 title={

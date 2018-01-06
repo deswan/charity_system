@@ -16,7 +16,8 @@ class PersonalInformation extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            orgs: []
+            orgs: [],
+            current:'',
         }
     }
     handleOpen = (page) => {
@@ -25,6 +26,11 @@ class PersonalInformation extends Component {
     getUser = data => {
         this.setState({
             orgs:data.orgs
+        })
+    }
+    onMenuClick = ({key})=>{
+        this.setState({
+            current:key
         })
     }
     render() {
@@ -37,7 +43,8 @@ class PersonalInformation extends Component {
                             <Sider width={200} style={{ background: '#fff' }}>
                                 <Menu
                                     mode="inline"
-                                    selectedKeys={['1']}
+                                    onClick={this.onMenuClick}
+                                    selectedKeys={[this.state.current]}
                                     defaultOpenKeys={['org-list']}
                                     style={{ height: '100%' }}
                                 >

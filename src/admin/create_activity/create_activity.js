@@ -46,7 +46,7 @@ class CreateActivity extends Component {
             }
         });
     }
-    beforeUpload(file) {
+    beforeUpload = (file)=>{
         this.setState({
             isAvatarUploading:true
         })

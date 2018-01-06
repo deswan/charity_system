@@ -1,13 +1,15 @@
 import React, { Component } from 'react';
 import './activity_detail.less';
-import { Button, Avatar, Row, Col, Form, Input, Radio, DatePicker, Tag, Badge, Table, Divider, Pagination, Card, List, Modal, Upload, Icon, Select, message, Rate } from 'antd';
+import { Button, Avatar, Row, Col, Form, Input, Radio, DatePicker, Tag, Badge, Table, Divider, Pagination, Card, List, Modal, Upload, Icon, Select, message, Rate,InputNumber } from 'antd';
 import numeral from 'numeral';
+import moment from 'moment';
 import { activity_status } from '../../config';
 import DescriptionList from 'ant-design-pro/lib/DescriptionList';
 import NumberInfo from 'ant-design-pro/lib/NumberInfo';
 import PageHeader from 'ant-design-pro/lib/PageHeader';
 import LargeDetailListItem from '../../components/LargeDetailListItem/LargeDetailListItem';
 import { Steps } from 'antd';
+import { req } from '../../helper';
 const Step = Steps.Step;
 const { Description } = DescriptionList;
 const FormItem = Form.Item;
@@ -24,94 +26,66 @@ class ActivityDetail extends Component {
                 show: false,
                 isAvatarUploading: false,
                 avatarUrl: "",
-                typeList: [
-                    {
-                        id: 1,
-                        name: 'tag1'
-                    }
-                ],
-                name: {
-                    value: 123,
-                    isEdit: false
-                },
-                slogan: {
-                    value: 123,
-                    isEdit: false
-                },
-                tags: {
-                    value: [
-                        {
-                            id: 213,
-                            name: 'tag1'
-                        }
-                    ],
-                    isEdit: false
-                }
+                typeList: []
             },
             id: 23,
             name: 'asdsda',
             img: require('../../img/img.jpg'),
-            tags: [{
-                id: 10,
-                name: '爱老敬老'
-            }],
+            tags: [],
             status: '0',
             start_time: '2017-10-17 11:11:12',
             end_time: '2017-10-17 11:11:12',
             location: '广州市广东工业大学',
             recipientCount: 123,
+
             recruitCount: 3243,
-            joinedCount: 123,
             sponsor_count: 132423,
 
-            orgImg: require('../../img/img.jpg'),
-            orgName: '爱之花',
-            orgSlogan: '啊啊啊啊啊啊啊啊啊啊啊啊啊啊',
-            orgHelpedCount: 134432,
             create_time: '2017-10-17 11:11:12',
-            volunteerCount: 12334,
-            volunteers: [
-                {
-                    id: 123,
-                    img: require('../../img/img.jpg'),
-                    name: '花花'
-                }
-            ],
-            sponsors: [
-                {
-                    id: 1,
-                    img: require('../../img/img.jpg'),
-                    name: '恒大地产',
-                    money: 1234
-                }
-            ],
-            comments: [
-                {
-                    id: 1,
-                    userImg: require('../../img/img.jpg'),
-                    imgs: [
-                        require('../../img/img.jpg'),
-                        require('../../img/img.jpg'),
-                    ],
-                    detail: '恒阿斯顿撒多撒多大地产',
-                    name: '花花',
-                    time: '1023-10-14',
-                    rate: 2
-                }
-            ]
+            volunteers: [],
+
+            sponsors: [],
+            comments: []
         }
     }
     handleOpen = (page) => {
         window.open('/' + page, '_self')
     }
     componentWillMount() {
-        // fetch('/api/').then((res)=>{
-        //   console.log(res)
-        // })
+        req({
+            url: '/api/getActByIdInAdmin',
+            params: {
+                actId: this.props.match.params.id,
+            }
+        }).then((data) => {
+            this.setState(data)
+        }).catch((err) => {
+            message.error(err.message);
+        })
+        req({
+            url: '/api/getAllTags'
+        }).then((data) => {
+            this.setState((state)=>{
+                state.editModal.typeList = data;
+                return state;
+            })
+        }).catch((err) => {
+            message.error(err.message);
+        })
     }
     showModal = () => {
+        this.props.form.setFieldsValue({
+            name:this.state.name,
+            date:[moment(this.state.start_time),moment(this.state.end_time)],
+            location:this.state.location,
+            recipient_number:this.state.recipient_number,
+            tags:this.state.tags.map((tag)=>{
+                return tag.tagId
+            })
+        })
         this.setState(state => {
             state.editModal.show = true;
+            state.editModal.avatarUrl = this.state.img;
             return state;
         });
     }
@@ -127,36 +101,35 @@ class ActivityDetail extends Component {
             return state;
         });
     }
+    beforeUpload = (file) => {
+        this.setState((state) => {
+            state.editModal.isAvatarUploading = true;
+            return state;
+        })
+    }
     handleUploadChange = ({ file, fileList, event }) => {
         if (file.status == 'done') {
             message.success('上传成功');
-
+            this.setState((state) => {
+                state.editModal.isAvatarUploading = false;
+                state.editModal.avatarUrl = file.response;
+                return state;
+            })
         } else if (file.status == 'error') {
             message.error('上传失败');
+            this.setState(state => {
+                state.editModal.isAvatarUploading = false;
+                return state;
+            });
         }
     }
-    handleEdit = (field) => {
-        this.setState((prev) => {
-            prev.editModal[field].isEdit = true
-            return prev;
-        })
-    }
-    handleCommit = (field) => {
-        this.setState((prev) => {
-            prev.editModal[field].isEdit = false
-            return prev;
-        })
-    }
-    handleCancel = (field) => {
-        this.setState((prev) => {
-            prev.editModal[field].isEdit = false
-            return prev;
-        })
-    }
-    handleTabChange = (key)=>{
+    handleTabChange = (key) => {
         this.setState({
-            tabKey:key
+            tabKey: key
         })
+    }
+    handleCancelAct = () => {
+
     }
     render() {
         const { getFieldDecorator } = this.props.form;
@@ -176,7 +149,7 @@ class ActivityDetail extends Component {
         };
         const uploadButton = (
             <div>
-                <Icon type={this.state.isAvatarUploading ? 'loading' : 'plus'} />
+                <Icon type={this.state.editModal.isAvatarUploading ? 'loading' : 'plus'} />
                 <div className="ant-upload-text">上传</div>
             </div>
         );
@@ -190,12 +163,17 @@ class ActivityDetail extends Component {
         return (
             <div>
                 <PageHeader
-                    title={this.state.name}
+                    title={
+                        <span>
+                            {this.state.name}
+                            <Badge style={{ marginLeft: '20px' }} status={activity_status[this.state.status].badge} text={activity_status[this.state.status].text} />
+                        </span>
+                    }
                     logo={<img src={this.state.img} />}
                     action={
                         <div>
                             <Button type="primary" onClick={this.showModal}>编辑</Button>
-                            <Button type="danger">取消活动</Button>
+                            <Button type="danger" onClick={this.handleCancelAct}>取消活动</Button>
                         </div>
                     }
                     content={
@@ -203,7 +181,7 @@ class ActivityDetail extends Component {
                             <div style={{ marginBottom: '10px' }}>
                                 {
                                     this.state.tags.map(item => {
-                                        return <Tag color="cyan" key={item.id}>{item.name}</Tag>
+                                        return <Tag color="cyan" key={item.tagId}>{item.tagName}</Tag>
                                     })
                                 }
                             </div>
@@ -221,7 +199,7 @@ class ActivityDetail extends Component {
                             <NumberInfo
                                 className="number-info"
                                 subTitle={<span>义工数</span>}
-                                total={this.state.volunteerCount}
+                                total={this.state.vol_count}
                             />
                             <NumberInfo
                                 className="number-info"
@@ -237,15 +215,7 @@ class ActivityDetail extends Component {
                 {
                     this.state.tabKey == 'detail' ?
                         (
-                            <div style={{marginTop:'20px'}}>
-                                <Card title="活动状态" bordered={false}>
-                                    <Steps current={1} progressDot>
-                                        <Step title="未开始" description={this.state.create_time} />
-                                        <Step title="预备中" description="This is a description." />
-                                        <Step title="进行中" description="This is a description." />
-                                        <Step title="已完成" description="This is a description." />
-                                    </Steps>
-                                </Card>
+                            <div style={{ marginTop: '20px' }}>
                                 <Card title="义工列表" bordered={false}>
                                     <List
                                         grid={{ column: 4 }}
@@ -267,7 +237,7 @@ class ActivityDetail extends Component {
                                                 <List.Item.Meta
                                                     avatar={<Avatar src={item.img} />}
                                                     title={item.name}
-                                                    description={'赞助总金额：' + numeral(item.money).format('0,0')}
+                                                    description={'赞助总金额：' + numeral(item.amount).format('0,0')}
                                                 />
                                             </List.Item>
                                         )}
@@ -277,7 +247,7 @@ class ActivityDetail extends Component {
                         ) :
                         (
                             <List
-                                style={{marginTop:'20px'}}
+                                style={{ marginTop: '20px' }}
                                 dataSource={this.state.comments}
                                 renderItem={(item, idx) => (
                                     <LargeDetailListItem
@@ -330,101 +300,75 @@ class ActivityDetail extends Component {
                                     showUploadList={false}
                                     action="/api/uploadPhoto"
                                     onChange={this.handleUploadChange}
+                                    beforeUpload={this.beforeUpload}
                                 >
-                                    {this.state.editModal.avatarUrl ? <img src={this.state.editModal.avatarUrl} alt="" /> : uploadButton}
+                                    {this.state.editModal.avatarUrl ? <img src={this.state.editModal.avatarUrl} alt="" style={{maxWidth:'100px'}} /> : uploadButton}
                                 </Upload>
                             )}
                         </FormItem>
                         <FormItem
                             {...formItemLayout}
-                            label="组织名称">
-                            {this.state.editModal.name.isEdit ?
-                                (
-                                    <span>
-                                        {getFieldDecorator('name', {
-                                            rules: [
-                                                { required: true, message: '请输入组织名称' },
-                                                { max: 30, message: '不超过30个字符' }
-                                            ],
-                                            initialValue: this.state.editModal.name.value
-                                        })(
-                                            <Input style={{ width: '50%' }} />
-                                            )}
-                                        < a className="edit-commit-btn" onClick={this.handleCommit.bind(this, 'name')}>确定</a>
-                                        < a className="edit-commit-btn" onClick={this.handleCancel.bind(this, 'name')}>取消</a>
-                                    </span>
-                                ) :
-                                (
-                                    <span>
-                                        {this.state.editModal.name.value}
-                                        < a className="edit-btn" onClick={this.handleEdit.bind(this, 'name')}><Icon type="edit" /></a>
-                                    </span>
-                                )
-
-                            }
+                            label="活动名称">
+                            {getFieldDecorator('name', {
+                                rules: [
+                                    { required: true, message: '请输入活动名称' },
+                                    { max: 30, message: '不超过30个字符' },
+                                ]
+                            })(
+                                <Input />
+                                )}
                         </FormItem>
                         <FormItem
                             {...formItemLayout}
-                            label="slogan">
-                            {this.state.editModal.slogan.isEdit ?
-                                (
-                                    <span>
-                                        {getFieldDecorator('slogan', {
-                                            rules: [
-                                                { required: true, message: '请输入slogan' },
-                                                { max: 50, message: '不超过50个字符' }
-                                            ],
-                                            initialValue: this.state.editModal.slogan.value
-                                        })(
-                                            <Input style={{ width: '50%' }} />
-                                            )}
-                                        < a className="edit-commit-btn" onClick={this.handleCommit.bind(this, 'slogan')}>确定</a>
-                                        < a className="edit-commit-btn" onClick={this.handleCancel.bind(this, 'slogan')}>取消</a>
-                                    </span>
-                                ) : (
-                                    <span>
-                                        {this.state.editModal.slogan.value}
-                                        < a className="edit-btn" onClick={this.handleEdit.bind(this, 'slogan')}><Icon type="edit" /></a>
-                                    </span>
-                                )
-                            }
+                            label="开始-结束时间">
+                            {getFieldDecorator('date', {
+                                rules: [{ required: true, message: '请填写开始-结束时间' }]
+                            })(
+                                <RangePicker />
+                                )}
                         </FormItem>
                         <FormItem
                             {...formItemLayout}
-                            label="组织类型">
-                            {this.state.editModal.tags.isEdit ?
-                                (
-                                    <span>
-                                        {getFieldDecorator('tags', {
-                                            rules: [{ required: true, message: '请选择组织类型' }],
-                                            initialValue: this.state.editModal.tags.value.map(tag => {
-                                                return tag.id
-                                            }).join(',')
-                                        })(
-                                            <Select
-                                                mode="tags"
-                                                style={{ width: '70%' }}
-                                            >
-                                                {
-                                                    this.state.editModal.typeList.map(type => {
-                                                        return <Option key={type.id} value={type.id}>{type.name}</Option>
-                                                    })
-                                                }
-                                            </Select>
-                                            )}
-                                        < a className="edit-commit-btn" onClick={this.handleCommit.bind(this, 'tags')}>确定</a>
-                                        < a className="edit-commit-btn" onClick={this.handleCancel.bind(this, 'tags')}>取消</a>
-                                    </span>
-                                ) :
-                                (
-                                    <span>
-                                        {this.state.editModal.tags.value.map(item => {
-                                            return <Tag color="cyan" key={item.id}>{item.name}</Tag>
-                                        })}
-                                        <a className="edit-btn" onClick={this.handleEdit.bind(this, 'tags')}><Icon type="edit" /></a>
-                                    </span>
-                                )
-                            }
+                            label="活动地点">
+                            {getFieldDecorator('location', {
+                                rules: [
+                                    { required: true, message: '请填写活动地点' },
+                                    { max: 50, message: '不超过50个字符' },
+                                ],
+                            })(
+                                <Input prefix={<Icon type="environment-o" />} />
+                                )}
+                        </FormItem>
+                        <FormItem
+                            {...formItemLayout}
+                            label="活动类型">
+                            {getFieldDecorator('tags', {
+                                rules: [{ required: true, message: '请填写活动类型' }]
+                            })(
+                                <Select
+                                    showSearch
+                                    mode="multiple"
+                                    filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
+                                    optionFilterProp="children"
+                                    // style={{ width: '100%' }}
+                                    placeholder="请选择类型"
+                                >
+                                    {
+                                        this.state.editModal.typeList.map(type => {
+                                            return <Option key={type.id}>{type.name}</Option>
+                                        })
+                                    }
+                                </Select>
+                                )}
+                        </FormItem>
+                        <FormItem
+                            {...formItemLayout}
+                            label="受助人数">
+                            {getFieldDecorator('recipient_number', {
+                                rules: [{ required: true, message: '请填写受助人数' }]
+                            })(
+                                <InputNumber min={1} />
+                                )}
                         </FormItem>
                     </Form>
                 </Modal>

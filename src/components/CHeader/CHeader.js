@@ -10,52 +10,45 @@ export default class CHeader extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            status: 0,
-            user: {
-                id:0,
-                img: require('../../img/img.jpg'),
-                name: '红莲',
-                orgs: [
-                    {
-                        id: 1,
-                        name: '爱之花',
-                        img: require('../../img/img.jpg')
-                    }
-                ]
-            },
-            notice: {
-                information: [
-                    {
-                        key: '',
-                        title: 'asd',
-                        description: '123'
-                    }
-                ],
-                todos: [
-                    {
-                        key: '',
-                        title: 'asd',
-                        description: '123'
-                    }
-                ]
-            }
+            status: 1,
+            user: {},
+            orgs: [],
+            adminOrgs: [],
+            notice: []
         }
     }
     componentWillMount = () => {
         req({
-            url:'/api/getUser'
+            url: '/api/getUser'
         }).then((data) => {
-            this.setState({ status: data.status })
             if (data.status == 0) {
                 this.setState({
+                    status: data.status,
                     user: {
-                        img:data.data.portrait,
-                        name:data.data.name,
-                        orgs:data.orgs
+                        name: data.data.name,
+                        portrait: data.data.portrait
                     },
+                    orgs: data.orgs,
+                    adminOrgs: data.adminOrgs
                 })
+            } else {
+                this.setState({ status: data.status })
+
             }
             this.props.userLoaded && this.props.userLoaded(data);
+            return data.status;
+        }).then((status) => {
+            if (status == 0) {
+                return req({
+                    url: '/api/getNotice'
+                }).then((data) => {
+                    this.setState({
+                        notice: data,
+                    })
+                }).catch(err => {
+                    message.error(err.message)
+                })
+            }
         }).catch(err => {
             message.error(err.message)
         })
@@ -66,7 +59,7 @@ export default class CHeader extends Component {
     }
     render() {
         return (
-            <Header className="c-header" style={{opacity:0.9}}>
+            <Header className="c-header" style={{ opacity: 0.9 }}>
                 <div className="header-title">公益活动管理系统</div>
                 <Menu
                     mode="horizontal"
@@ -78,12 +71,25 @@ export default class CHeader extends Component {
                     <Menu.Item key="index">公益活动</Menu.Item>
                     <Menu.Item key="org_list">义工组织</Menu.Item>
                     {
-                        this.state.status == 1 ?
-                            (<Menu.Item key="login" style={{ float: 'right' }}>登陆</Menu.Item>) :
+                        this.state.adminOrgs.length && (
+                            <SubMenu style={{ float: 'right' }} className="header-submenu" title="管理">
+                                {
+                                    this.state.adminOrgs.map(i => {
+                                        return <Menu.Item key={`admin/${i.id}`}>
+                                            <Avatar src={i.img} size="small" className="middle-avatar" />
+                                            <span>{i.name}</span>
+                                        </Menu.Item>
+                                    })
+                                }
+                            </SubMenu>
+                        )
+                    }
+                    {
+                        this.state.status == 0 ?
                             (
                                 <SubMenu style={{ float: 'right' }} className="header-submenu" title={
                                     <div>
-                                        <Avatar src={this.state.user.img} style={{ verticalAlign: 'middle', marginRight: '10px' }} />
+                                        <Avatar src={this.state.user.portrait} style={{ verticalAlign: 'middle', marginRight: '10px' }} />
                                         <span>{this.state.user.name}</span>
                                     </div>
                                 }>
@@ -97,9 +103,9 @@ export default class CHeader extends Component {
                                     </Menu.Item>
                                     <SubMenu title={<span><Icon type="user" />义工组织</span>}>
                                         {
-                                            this.state.user.orgs.map(item => {
+                                            this.state.orgs.map(item => {
                                                 return (
-                                                    <Menu.Item key={'personal_information/#/org/'+item.id}>
+                                                    <Menu.Item key={'personal_information/#/org/' + item.id}>
                                                         <Avatar src={item.img} size="small" className="middle-avatar" />
                                                         <span>{item.name}</span>
                                                     </Menu.Item>
@@ -107,29 +113,42 @@ export default class CHeader extends Component {
                                             })
                                         }
                                     </SubMenu>
+                                    <Menu.Item key="/createorg">
+                                        <Icon type="pie-chart" />
+                                        <span>创建组织</span>
+                                    </Menu.Item>
                                     <Menu.Item key="logout">
                                         <Icon type="logout" />
                                         <span>退出</span>
                                     </Menu.Item>
                                 </SubMenu>
                             )
+                            : (<Menu.Item key="login" style={{ float: 'right' }}>登陆</Menu.Item>)
                     }
-                    <Menu.Item key="notice" style={{ float: 'right' }} className="notice-icon">
-                        <NoticeIcon count={5}>
-                            <NoticeIcon.Tab
-                                list={this.state.notice.information}
-                                title="通知"
-                                emptyText="你已查看所有通知"
-                                emptyImage="https://gw.alipayobjects.com/zos/rmsportal/wAhyIChODzsoKIOBHcBk.svg"
-                            />
-                            <NoticeIcon.Tab
-                                list={this.state.notice.todos}
-                                title="待办"
-                                emptyText="你已查看所有待办"
-                                emptyImage="https://gw.alipayobjects.com/zos/rmsportal/wAhyIChODzsoKIOBHcBk.svg"
-                            />
-                        </NoticeIcon>
-                    </Menu.Item>
+                    {
+                        this.state.notice.length && (
+                            <Menu.Item key="notice" style={{ float: 'right' }} className="notice-icon">
+                                <NoticeIcon count={this.state.notice.length}>
+                                {
+                                    [
+                                        <NoticeIcon.Tab
+                                        list={this.state.notice.map(i=>{
+                                            return {
+                                                title:i.type == 0 ? '活动进度提醒' : '申请结果',
+                                                description:i.type == 0 ? `活动 ${i.target_name} 状态已变为 ${i.statusText}` : `您的申请加入 ${i.target_name} ${i.target_type == 0 ? '组织' : '活动'} 已变为 ${i.statusText}`,
+                                                datetime:i.create_time
+                                            }
+                                        })}
+                                        title="通知"
+                                        emptyText="你已查看所有通知"
+                                        emptyImage="https://gw.alipayobjects.com/zos/rmsportal/wAhyIChODzsoKIOBHcBk.svg"
+                                    />
+                                    ]
+                                }
+                                </NoticeIcon>
+                            </Menu.Item>
+                        )
+                    }
                 </Menu>
             </Header>
         )

@@ -88,6 +88,16 @@ module.exports = {
       require.resolve('react-dev-utils/webpackHotDevClient'),
       paths.appSrc+'/admin/index.js'
     ],
+    createorg:[
+      require.resolve('./polyfills'),
+      require.resolve('react-dev-utils/webpackHotDevClient'),
+      paths.appSrc+'/create_org/create_org.js'
+    ],
+    sponsor:[
+      require.resolve('./polyfills'),
+      require.resolve('react-dev-utils/webpackHotDevClient'),
+      paths.appSrc+'/create_sponsor/create_sponsor.js'
+    ],
   },
   output: {
     // Add /* filename */ comments to generated require()s in the output.
@@ -295,6 +305,18 @@ module.exports = {
       chunks: ["admin"],
       template: paths.appHtml,
       filename: 'admin.html',
+    }),
+    new HtmlWebpackPlugin({
+      inject: true,
+      chunks: ["createorg"],
+      template: paths.appHtml,
+      filename: 'createorg.html',
+    }),
+    new HtmlWebpackPlugin({
+      inject: true,
+      chunks: ["sponsor"],
+      template: paths.appHtml,
+      filename: 'sponsor.html',
     }),
     // Add module names to factory functions so they appear in browser profiler.
     new webpack.NamedModulesPlugin(),
