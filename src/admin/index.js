@@ -4,7 +4,7 @@ import { HashRouter as Router, Route, Link } from 'react-router-dom';
 import registerServiceWorker from '../registerServiceWorker';
 import React, { Component } from 'react';
 import './index.less';
-import { Layout, Menu, Avatar, Icon } from 'antd';
+import { Layout, Menu, Avatar, Icon, message } from 'antd';
 import NoticeIcon from 'ant-design-pro/lib/NoticeIcon';
 import ActivityManage from './activity_manage/activity_manage';
 import VolunteerManage from './volunteer_manage/volunteer_manage';
@@ -12,6 +12,7 @@ import CreateActivity from './create_activity/create_activity';
 import PageNotice from './notice/notice';
 import PageSetting from './setting/setting';
 import PageActivityDetail from './activity_detail/activity_detail';
+import { req } from '../helper';
 const { SubMenu } = Menu;
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -19,22 +20,43 @@ class Admin extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            org: {
-                img: require('../img/img.jpg'),
-                name: '爱之花'
-            },
-            user: {
-                img: require('../img/img.jpg'),
-                name: '红莲',
-                orgs: [
-                    {
-                        id: 1,
-                        name: '爱之花',
-                        img: require('../img/img.jpg')
-                    }
-                ]
-            }
+            user: {},
+            orgs: [],
+            adminOrgs: [],
+            orgName: '',
+            orgImg: ''
         }
+    }
+    componentWillMount = () => {
+        let path = window.location.href.slice(0, window.location.href.lastIndexOf('#'));
+        let id = parseInt(path.slice(path.lastIndexOf('/') + 1));
+        req({
+            url: '/api/getUser'
+        }).then((data) => {
+            if (data.status == 0) {
+                this.setState({
+                    user: {
+                        name: data.data.name,
+                        portrait: data.data.portrait
+                    },
+                    orgs: data.orgs,
+                    adminOrgs: data.adminOrgs
+                })
+            }
+        }).catch(err => {
+            message.error(err.message)
+        })
+        req({
+            url: '/api/getOrgProfileById',
+            params: { orgId:id }
+        }).then((data) => {
+            this.setState({
+                orgName: data.name,
+                orgImg: data.logo
+            })
+        }).catch(err => {
+            message.error(err.message)
+        })
     }
     handleOpen = (page) => {
         window.open('/' + page + '.html', '_self')
@@ -45,8 +67,8 @@ class Admin extends Component {
                 <Layout>
                     <Header>
                         <div className="header-title">
-                            <span style={{marginRight:'20px'}}>义工组织管理</span>
-                            <Avatar src={this.state.org.img} className="middle-avatar" /><span>{this.state.org.name}</span>
+                            <span style={{ marginRight: '20px' }}>义工组织管理</span>
+                            <Avatar src={this.state.orgName} className="middle-avatar" /><span>{this.state.orgImg}</span>
                         </div>
                         <Menu
                             mode="horizontal"
@@ -54,25 +76,35 @@ class Admin extends Component {
                             className="header-menu"
                             onClick={this.handleOpen}
                         >
+                            <SubMenu style={{ float: 'right' }} className="header-submenu" title="管理">
+                                {
+                                    this.state.adminOrgs.map(i => {
+                                        return <Menu.Item key={`admin/${i.id}`}>
+                                            <Avatar src={i.img} size="small" className="middle-avatar" />
+                                            <span>{i.name}</span>
+                                        </Menu.Item>
+                                    })
+                                }
+                            </SubMenu>
                             <SubMenu style={{ float: 'right' }} className="header-submenu" title={
                                 <div>
                                     <Avatar src={this.state.user.img} style={{ verticalAlign: 'middle', marginRight: '10px' }} />
                                     <span>{this.state.user.name}</span>
                                 </div>
                             }>
-                                <Menu.Item key="personal_information/#/profile">
+                                {/* <Menu.Item key="personal_information/#/profile">
                                     <Icon type="pie-chart" />
                                     <span>个人信息</span>
-                                </Menu.Item>
+                                </Menu.Item> */}
                                 <Menu.Item key="personal_information/#/activities">
                                     <Icon type="pie-chart" />
                                     <span>我的活动</span>
                                 </Menu.Item>
                                 <SubMenu title={<span><Icon type="user" />义工组织</span>}>
                                     {
-                                        this.state.user.orgs.map(item => {
+                                        this.state.orgs.map(item => {
                                             return (
-                                                <Menu.Item key={item.id}>
+                                                <Menu.Item key={'personal_information/#/org/' + item.id}>
                                                     <Avatar src={item.img} size="small" className="middle-avatar" />
                                                     <span>{item.name}</span>
                                                 </Menu.Item>
@@ -80,16 +112,24 @@ class Admin extends Component {
                                         })
                                     }
                                 </SubMenu>
+                                <Menu.Item key="/createorg">
+                                    <Icon type="pie-chart" />
+                                    <span>创建组织</span>
+                                </Menu.Item>
+                                <Menu.Item key="logout">
+                                    <Icon type="logout" />
+                                    <span>退出</span>
+                                </Menu.Item>
                             </SubMenu>
                         </Menu>
                     </Header>
                     <Content>
                         <Layout style={{ background: '#fff', height: '100%' }}>
-                            <Sider width={300} style={{backgroundColor:'white' }}>
+                            <Sider width={300} style={{ backgroundColor: 'white' }}>
                                 <Menu
                                     mode="vertical"
                                     selectedKeys={['1']}
-                                    style={{ height: '100%', position: 'fixed', width: '300px'}}
+                                    style={{ height: '100%', position: 'fixed', width: '300px' }}
                                 >
                                     <Menu.Item key="1">
                                         <Link to="/activity-manage">

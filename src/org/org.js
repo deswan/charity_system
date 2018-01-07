@@ -132,7 +132,7 @@ class App extends Component {
                                             <div>
                                                 {
                                                     item.photos &&
-                                                    item.photos.map(img => {
+                                                    item.photos.split(',').map(img => {
                                                         return (
                                                             <div className="comment-imgContainer">
                                                                 <img src={img} alt="" />

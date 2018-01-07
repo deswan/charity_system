@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import './setting.less';
 import { Button, Avatar, Row, Col, Form, Input, DatePicker, Upload, InputNumber, Select, message, Icon, Tag } from 'antd';
+import { req } from '../../helper';
 const FormItem = Form.Item;
 const RangePicker = DatePicker.RangePicker;
 const Option = Select.Option;
@@ -26,12 +27,7 @@ class Setting extends Component {
                 isEdit: false
             },
             tags: {
-                value: [
-                    {
-                        id: 213,
-                        name: 'tag1'
-                    }
-                ],
+                value: [],
                 isEdit: false
             }
         }
@@ -40,25 +36,45 @@ class Setting extends Component {
         window.open('/' + page, '_self')
     }
     componentWillMount() {
-        // fetch('/api/').then((res)=>{
-        //   console.log(res)
-        // })
+        let path = window.location.href.slice(0, window.location.href.lastIndexOf('#'));
+        let id = parseInt(path.slice(path.lastIndexOf('/') + 1));
+        this.setState({ id }, this.getData)
     }
-    handleSubmit = (e) => {
-        console.log('submit')
-        e.preventDefault();
-        this.props.form.validateFields((err, values) => {
-            if (!err) {
-                console.log(values);
+    getData = ()=>{
+        req({
+            url: '/api/getOrgProfileById',
+            params: {
+                orgId: this.state.id,
             }
-        });
+        }).then((data) => {
+            this.setState(state=>{
+                state.avatarUrl = data.logo;
+                state.name.value = data.name;
+                state.slogan.value = data.slogan;
+                state.tags.value = data.tags;
+                return state;
+            })
+        }).catch((err) => {
+            message.error(err.message);
+        })
     }
+    beforeUpload = (file)=>{
+        this.setState({
+            isAvatarUploading:true
+        })
+      }
     handleUploadChange = ({ file, fileList, event }) => {
         if (file.status == 'done') {
             message.success('上传成功');
-
+            this.setState({
+                avatarUrl:file.response,
+                isAvatarUploading:false
+            })
         } else if (file.status == 'error') {
             message.error('上传失败');
+            this.setState({
+                isAvatarUploading:false
+            })
         }
     }
     handleEdit = (field) => {
@@ -68,9 +84,25 @@ class Setting extends Component {
         })
     }
     handleCommit = (field) => {
-        this.setState((prev) => {
-            prev[field].isEdit = false
-            return prev;
+        this.props.form.validateFields([field],(err,values)=>{
+            if(err) return;
+            console.log(values);
+            req({
+                url: '/api/updateOrgProfile?orgId='+this.state.id,
+                type:'post',
+                params: {
+                    [field]:values[field]
+                }
+            }).then((data) => {
+                this.setState(state=>{
+                    state[field].value = values[field];
+                    state[field].isEdit = false
+                    return state;
+                })
+            }).catch((err) => {
+                message.error(err.message);
+            })
+
         })
     }
     handleCancel = (field) => {
@@ -206,7 +238,7 @@ class Setting extends Component {
                             (
                                 <span>
                                     {this.state.tags.value.map(item => {
-                                        return <Tag color="cyan" key={item.id}>{item.name}</Tag>
+                                        return <Tag color="cyan" key={item.tagId}>{item.tagName}</Tag>
                                     })}
                                     <a className="edit-btn" onClick={this.handleEdit.bind(this, 'tags')}><Icon type="edit" /></a>
                                 </span>

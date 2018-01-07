@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './org.less';
-import { Avatar, Form, Input, Button, Icon, Popover, Tabs, List, Row, Col, Badge, DatePicker, Divider, Select, Card, Tag, Rate, message } from 'antd';
+import { Avatar, Form, Input, Button, Icon, Popover, Tabs, List, Row, Col, Badge, DatePicker, Divider, Select, Card, Tag, Rate, message, Modal } from 'antd';
 import TagSelect from 'ant-design-pro/lib/TagSelect';
 import numeral from 'numeral';
 import NumberInfo from 'ant-design-pro/lib/NumberInfo';
@@ -15,6 +15,7 @@ const { TabPane } = Tabs;
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 const FormItem = Form.Item;
+const confirm = Modal.confirm;
 
 class Org extends Component {
     constructor(props) {
@@ -37,14 +38,35 @@ class Org extends Component {
     }
     componentWillMount = () => {
         let id = this.props.match.params.id;
+        this.setState({ id }, this.getData)
+    }
+    getData = () => {
         req({
             url: '/api/getMyOrgById',
-            params: { id }
+            params: { id:this.state.id }
         }).then((data) => {
             this.setState(data)
         }).catch((err) => {
             message.error(err.message)
         })
+    }
+    quitAct = (actId, name) => {
+        let me = this;
+        confirm({
+            title: `确定退出活动 ${name} ?`,
+            onOk() {
+                req({
+                    url: '/api/quitAct',
+                    type:'post',
+                    params: { actId }
+                }).then((data) => {
+                    message.success('退出活动成功');
+                    me.getData();
+                }).catch((err) => {
+                    message.error(err.message)
+                })
+            }
+        });
     }
     render() {
         return (
@@ -98,7 +120,7 @@ class Org extends Component {
                     itemLayout="horizontal"
                     dataSource={this.state.myActs}
                     renderItem={item => (
-                        <List.Item actions={[<a>退出</a>]}>
+                        <List.Item actions={[<a onClick={this.quitAct.bind(this, item.id, item.name)}>退出</a>]}>
                             <List.Item.Meta
                                 title={
                                     <span>
@@ -158,7 +180,7 @@ class Org extends Component {
                                 <div>
                                     {
                                         item.photos &&
-                                        item.photos.map((img, idx) => {
+                                        item.photos.split(',').map((img, idx) => {
                                             return (
                                                 <div className="comment-imgContainer" key={idx}>
                                                     <img src={img} alt="" />

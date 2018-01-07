@@ -45,8 +45,7 @@ class OrgList extends Component {
     }
 
     handleTagChange = (checkedTags) => {
-        this.setState({ checkedTags })
-        setTimeout(this.getData.bind(this), 0);
+        this.setState({ checkedTags },this.getData)
     }
 
     getData = () => {
@@ -98,7 +97,7 @@ class OrgList extends Component {
                                     <div style={{ flex: 1, paddingLeft: '20px' }}>
                                         {
                                             item.tags.map(item => {
-                                                return <Tag color="cyan" key={item.tagId}><a href="https://github.com/ant-design/ant-design/issues/1862">{item.tagName}</a></Tag>
+                                                return <Tag color="cyan" key={item.tagId}>{item.tagName}</Tag>
                                             })
                                         }
                                     </div>

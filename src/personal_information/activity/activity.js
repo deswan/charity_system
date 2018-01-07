@@ -111,7 +111,7 @@ class Activity extends Component {
         const { getFieldDecorator } = this.props.form;
         return (
             <div className="c-activity">
-                <Form
+                {/* <Form
                     layout="inline"
                     onSubmit={this.handleSearch}
                 >
@@ -129,8 +129,8 @@ class Activity extends Component {
                         <Button type="primary" style={{ marginRight: '10px' }} onClick={this.handleSearch}>查询</Button>
                         <Button onClick={this.handleReset}>重置</Button>
                     </FormItem>
-                </Form>
-                <Tabs defaultActiveKey="1" onChange={this.onTabChange}>
+                </Form> */}
+                <Tabs defaultActiveKey={this.state.tabKey} onChange={this.onTabChange}>
                     <TabPane tab="未开始" key="0"></TabPane>
                     <TabPane tab="已结束" key="1"></TabPane>
                 </Tabs>

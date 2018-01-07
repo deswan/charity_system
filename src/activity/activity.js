@@ -22,7 +22,7 @@ class ActivityDetail extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            userStatus: 'NOT_JOIN',
+            userStatus: 'NOT_LOGIN',
             isShowJoin: false,
             id: 23,
             name: 'asdsda',
@@ -63,10 +63,31 @@ class ActivityDetail extends Component {
             isShowJoin: visible
         });
     }
-    handleSubmitApply() {
-        this.setState({
-            isShowJoin: false
-        });
+    handleSubmitApply = () => {
+        this.props.form.validateFields((err, values) => {
+            if (!err) {
+                req({
+                    url: '/api/applyAct',
+                    type: 'post',
+                    params: {
+                        actId: this.state.id,
+                        text: this.props.form.getFieldValue('apply-text')
+                    }
+                }).then((data) => {
+                    if (data.code === 0) {
+                        message.success('申请已提交');
+                        this.setState({
+                            isShowJoin: false
+                        });
+                        this.props.form.setFieldsValue({
+                            'apply-text': ''
+                        })
+                    }
+                }).catch((err) => {
+                    message.error(err.message)
+                })
+            }
+        })
     }
     render() {
         const { getFieldDecorator } = this.props.form;
@@ -75,7 +96,7 @@ class ActivityDetail extends Component {
         return (
             <div className="activity-detail">
                 <Layout >
-                    <CHeader />
+                    <CHeader userLoaded={this.getUser} />
                     <Content className="center-content">
                         <div>
                             <PageHeader
@@ -86,6 +107,7 @@ class ActivityDetail extends Component {
                                     </div>
                                 }
                                 action={
+                                    this.state.status === 0 && 
                                     <Popover
                                         content={
                                             this.state.userStatus == 'NOT_JOIN' ?
@@ -102,10 +124,13 @@ class ActivityDetail extends Component {
                                                             )}
                                                     </FormItem>
                                                     <div style={{ textAlign: 'right' }}>
-                                                        <Button onClick={this.handleSubmitApply.bind(this)} type="primary" size="small">申请</Button>
+                                                        <Button htmlType="submit" onClick={this.handleSubmitApply} type="primary" size="small" >申请</Button>
                                                     </div>
                                                 </Form>) :
-                                                (<span>您还未加入 {this.state.orgName} ，<a onClick={this.handleOpen.bind(this, 'org/' + this.orgId)}>现在加入</a></span>)
+                                                this.state.userStatus == 'NOT_ORG' ?
+                                                    (<span>您还未加入 {this.state.orgName} ，<a onClick={this.handleOpen.bind(this, 'org/' + this.orgId)}>现在加入</a></span>) :
+                                                    this.state.userStatus == 'NOT_LOGIN' ?
+                                                        (<span>您还未登陆，现在 <a onClick={this.handleOpen.bind(this, 'login')}>登陆</a></span>) : ''
                                         }
                                         title="参与活动"
                                         placement="leftTop"
@@ -113,7 +138,8 @@ class ActivityDetail extends Component {
                                         trigger="click"
                                         onVisibleChange={this.handleJoinVisibleChange}
                                     >
-                                        {this.state.userStatus == 'JOINED' ? (<span>您已参与该活动</span>) : (<Button type="primary" onClick={this.handleJoin}>参与</Button>)}
+                                        {this.state.userStatus == 'JOINED' ? (<span>您已参与该活动</span>) :
+                                            (<Button type="primary" onClick={this.handleJoin}>参与</Button>)}
                                     </Popover>
                                 }
                                 content={
@@ -123,7 +149,7 @@ class ActivityDetail extends Component {
                                                 <span>
                                                     <Icon type="team" /> 已招募义工数
                                                 </span>
-                                            }>{this.state.joinedCount}</Description>
+                                            }>{this.state.vol_count}</Description>
                                         </DescriptionList>
                                         <div style={{ margin: '20px 0' }}>
                                             {
@@ -135,7 +161,8 @@ class ActivityDetail extends Component {
                                     </div>
                                 }
                                 extraContent={
-                                    <a>赞助</a>
+                                    this.state.status === 0 && 
+                                    <a href={`/sponsor/${this.state.id}`}>赞助</a>
                                 }
                             />
                             <Row gutter={32} style={{ marginTop: '24px' }}>
@@ -189,7 +216,7 @@ class ActivityDetail extends Component {
                                             </Col>
                                             <Col span={14}>
                                                 <div className="imgContainer">
-                                                    <img alt="" src={this.state.img} />
+                                                    <img src={this.state.img} />
                                                 </div>
                                             </Col>
                                         </Row>
@@ -201,23 +228,23 @@ class ActivityDetail extends Component {
                                                 dataSource={this.state.comments}
                                                 renderItem={(item, idx) => (
                                                     <LargeDetailListItem
-                                                        avatar={<Avatar src={item.userImg} />}
+                                                        avatar={<Avatar src={item.portrait} />}
                                                         head={
                                                             <div>
                                                                 <h4>{item.name}</h4>
-                                                                <p>{item.detail}</p>
+                                                                <p>{item.comment}</p>
                                                             </div>
                                                         }
                                                         sider={
                                                             <div>
-                                                                <Rate disabled defaultValue={item.rate} />
-                                                                <p className="comment-sider-text">{item.time}</p>
+                                                                <Rate disabled defaultValue={item.score || 0} />
+                                                                <p className="comment-sider-text">{item.score_time}</p>
                                                             </div>
                                                         }
                                                         body={
                                                             <div>
-                                                                {
-                                                                    item.imgs.map((img, idx) => {
+                                                                {item.photos &&
+                                                                    item.photos.split(',').map((img, idx) => {
                                                                         return (
                                                                             <div className="comment-imgContainer" key={idx}>
                                                                                 <img src={img} alt="" />

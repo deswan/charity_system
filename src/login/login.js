@@ -30,6 +30,7 @@ class NormalLoginForm extends React.Component {
         }).then((data) => {
           if(data.code == 0){
             console.log('login success')
+            window.location = document.referrer;
           }
         }).catch((err) => {
           message.error(err.message)

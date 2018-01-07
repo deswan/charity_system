@@ -22,16 +22,16 @@ class App extends Component {
       activities: [],
       pagination: {
         current: 1,
-        total: 100
+        total: 100,
+        hideOnSinglePage: true,
+        onChange(page) {
+          let pagination = this.state.pagination;
+          pagination.current = page;
+          this.setState({ pagination }, this.getActData)
+        }
       },
       reviewActivities: []
     }
-  }
-  onActChange = (page) => {
-    let pagination = this.state.pagination;
-    pagination.current = page;
-    this.setState({ pagination })
-    setTimeout(this.getActData.bind(this), 0);
   }
   handleOpen = (page) => {
     window.open('/' + page, '_self')
@@ -58,8 +58,7 @@ class App extends Component {
     this.getActData();
   }
   handleTagChange = (checkedTags) => {
-    this.setState({ checkedTags })
-    setTimeout(this.getActData.bind(this), 0);
+    this.setState({ checkedTags }, this.getActData)
   }
   getActData = () => {
     req({
@@ -85,6 +84,8 @@ class App extends Component {
         <Layout style={{ background: 'white' }}>
           <CHeader pageName="index" />
           <Content class="content">
+          {
+            this.state.tags && 
             <TagSelect onChange={this.handleTagChange} expandable style={{ marginBottom: '20px' }}>
               {
                 this.state.tags.map(item => {
@@ -92,10 +93,13 @@ class App extends Component {
                 })
               }
             </TagSelect>
+          }
+            
             <Row>
               <List
                 grid={{ xs: 1, md: 4, gutter: 24 }}
                 dataSource={this.state.activities}
+                pagination={this.state.pagination}
                 renderItem={(item, idx) => (
                   <List.Item>
                     <ActivityCard onClick={this.handleOpen.bind(this, 'activity/' + item.id)} img={item.img} name={item.name} time={item.start_time} location={item.location} />
@@ -103,7 +107,6 @@ class App extends Component {
                 )}
               />
             </Row>
-            <Pagination onChange={this.onActChange} defaultPageSize={5} hideOnSinglePage current={this.state.pagination.current} total={this.state.pagination.total} />
             <Card title="往期精彩活动" bordered={false}>
               <Row>
                 <List
@@ -111,7 +114,7 @@ class App extends Component {
                   dataSource={this.state.reviewActivities}
                   renderItem={(item, idx) => (
                     <List.Item>
-                      <div class="previous-act" style={{ backgroundImage: 'url(' + item.img + ')' }}>
+                      <div onClick={this.handleOpen.bind(this, 'activity/' + item.id)} class="previous-act" style={{ backgroundImage: 'url(' + item.img + ')' }}>
                         <div class="previous-act-layer">
                           <span class="previous-act-layer-text">{item.name}</span>
                         </div>

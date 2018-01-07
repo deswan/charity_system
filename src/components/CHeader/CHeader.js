@@ -135,7 +135,7 @@ export default class CHeader extends Component {
                                         list={this.state.notice.map(i=>{
                                             return {
                                                 title:i.type == 0 ? '活动进度提醒' : '申请结果',
-                                                description:i.type == 0 ? `活动 ${i.target_name} 状态已变为 ${i.statusText}` : `您的申请加入 ${i.target_name} ${i.target_type == 0 ? '组织' : '活动'} 已变为 ${i.statusText}`,
+                                                description:i.type == 0 ? `活动 ${i.target_name} 状态已变为 ${i.statusText}` : `您的申请加入 ${i.target_name} ${i.target_type == 0 ? '组织' : '活动'} 已被 ${i.statusText}`,
                                                 datetime:i.create_time
                                             }
                                         })}

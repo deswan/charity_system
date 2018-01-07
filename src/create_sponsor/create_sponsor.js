@@ -4,7 +4,7 @@ import registerServiceWorker from '../registerServiceWorker';
 import React, { Component } from 'react';
 import './create_sponsor.less';
 import CHeader from '../components/CHeader/CHeader';
-import { Form, Icon, Input, Button, Checkbox, Layout, Tabs, DatePicker, Cascader, Upload, message, Radio,InputNumber } from 'antd';
+import { Form, Icon, Input, Button, Checkbox, Layout, Tabs, DatePicker, Cascader, Upload, message, Radio, InputNumber } from 'antd';
 import { req } from '../helper'
 const { Content, Sider } = Layout;
 const FormItem = Form.Item;
@@ -14,6 +14,7 @@ class CreateSponsorForm extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            id: 0,
             isAvatarUploading: false,
             avatarUrl: ""
         }
@@ -23,19 +24,47 @@ class CreateSponsorForm extends React.Component {
         this.props.form.validateFields((err, values) => {
             if (!err) {
                 console.log(values);
+                req({
+                    url: '/api/sponsor',
+                    type:'post',
+                    params: {
+                        actId: this.state.id,
+                        name: values.name,
+                        logo: this.state.avatarUrl,
+                        phone: values.phone,
+                        amount: values.amount
+                    }
+                }).then((data) => {
+                    message.success('申请已提交');
+                    window.history.go(-1);
+                }).catch((err) => {
+                    message.error(err.message);
+                })
             }
         });
+    }
+    beforeUpload = (file) => {
+        this.setState({
+            isAvatarUploading: true
+        })
     }
     handleUploadChange = ({ file, fileList, event }) => {
         if (file.status == 'done') {
             message.success('上传成功');
-
+            this.setState({
+                avatarUrl: file.response,
+                isAvatarUploading: false
+            })
         } else if (file.status == 'error') {
             message.error('上传失败');
+            this.setState({
+                isAvatarUploading: false
+            })
         }
     }
     componentWillMount() {
-
+        let id = parseInt(window.location.href.slice(window.location.href.lastIndexOf('/') + 1));
+        this.setState({id})
     }
     render() {
         const { getFieldDecorator } = this.props.form;
