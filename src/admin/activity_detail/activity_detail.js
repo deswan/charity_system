@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './activity_detail.less';
-import { Button, Avatar, Row, Col, Form, Input, Radio, DatePicker, Tag, Badge, Table, Divider, Pagination, Card, List, Modal, Upload, Icon, Select, message, Rate,InputNumber } from 'antd';
+import { Button, Avatar, Row, Col, Form, Input, Radio, DatePicker, Tag, Badge, Table, Divider, Pagination, Card, List, Modal, Upload, Icon, Select, message, Rate, InputNumber } from 'antd';
 import numeral from 'numeral';
 import moment from 'moment';
 import { activity_status } from '../../config';
@@ -16,6 +16,7 @@ const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
 const RangePicker = DatePicker.RangePicker;
 const Option = Select.Option;
+const confirm = Modal.confirm;
 
 class ActivityDetail extends Component {
     constructor(props) {
@@ -53,6 +54,19 @@ class ActivityDetail extends Component {
     }
     componentWillMount() {
         req({
+            url: '/api/getAllTags'
+        }).then((data) => {
+            this.setState((state) => {
+                state.editModal.typeList = data;
+                return state;
+            })
+        }).catch((err) => {
+            message.error(err.message);
+        })
+        this.getData();
+    }
+    getData = () => {
+        req({
             url: '/api/getActByIdInAdmin',
             params: {
                 actId: this.props.match.params.id,
@@ -62,24 +76,14 @@ class ActivityDetail extends Component {
         }).catch((err) => {
             message.error(err.message);
         })
-        req({
-            url: '/api/getAllTags'
-        }).then((data) => {
-            this.setState((state)=>{
-                state.editModal.typeList = data;
-                return state;
-            })
-        }).catch((err) => {
-            message.error(err.message);
-        })
     }
     showModal = () => {
         this.props.form.setFieldsValue({
-            name:this.state.name,
-            date:[moment(this.state.start_time),moment(this.state.end_time)],
-            location:this.state.location,
-            recipient_number:this.state.recipient_number,
-            tags:this.state.tags.map((tag)=>{
+            name: this.state.name,
+            date: [moment(this.state.start_time), moment(this.state.end_time)],
+            location: this.state.location,
+            recipient_number: this.state.recipient_number,
+            tags: this.state.tags.map((tag) => {
                 return tag.tagId
             })
         })
@@ -90,10 +94,33 @@ class ActivityDetail extends Component {
         });
     }
     handleEditOk = () => {
-        this.setState(state => {
-            state.editModal.show = false;
-            return state;
-        });
+        this.props.form.validateFields((err, values) => {
+            if (err) return;
+            console.log(values);
+            req({
+                url: '/api/updateActProfile',
+                type: 'post',
+                params: {
+                    actId: this.state.id,
+                    img: this.state.editModal.avatarUrl,
+                    start_time: values.date && values.date[0].format('YYYY-MM-DD H:m:s') || '',
+                    end_time: values.date && values.date[1].format('YYYY-MM-DD H:m:s') || '',
+                    name: values.name,
+                    location: values.location,
+                    recipient_number: values.recipient_number,
+                    tags: values.tags.join(',')
+                }
+            }).then((data) => {
+                message.success('修改成功');
+                this.getData();
+                this.setState((state) => {
+                    state.editModal.show = false;
+                    return state;
+                })
+            }).catch((err) => {
+                message.error(err.message);
+            })
+        })
     }
     handleEditCancel = () => {
         this.setState(state => {
@@ -129,7 +156,22 @@ class ActivityDetail extends Component {
         })
     }
     handleCancelAct = () => {
-
+        let me = this;
+        confirm({
+            title: `确定取消活动 ${this.state.name} ?`,
+            onOk() {
+                req({
+                    url: '/api/cancelAct',
+                    type:'post',
+                    params: { actId:this.state.id }
+                }).then((data) => {
+                    message.success('退出活动成功');
+                    me.getData();
+                }).catch((err) => {
+                    message.error(err.message)
+                })
+            }
+        });
     }
     render() {
         const { getFieldDecorator } = this.props.form;
@@ -172,8 +214,8 @@ class ActivityDetail extends Component {
                     logo={<img src={this.state.img} />}
                     action={
                         <div>
-                            <Button type="primary" onClick={this.showModal}>编辑</Button>
-                            <Button type="danger" onClick={this.handleCancelAct}>取消活动</Button>
+                            <Button disabled={this.state.status != 0} type="primary" onClick={this.showModal}>编辑</Button>
+                            <Button disabled={this.state.status != 0 && this.state.status != 1 && this.state.status != 2} type="danger" onClick={this.handleCancelAct}>取消活动</Button>
                         </div>
                     }
                     content={
@@ -251,23 +293,24 @@ class ActivityDetail extends Component {
                                 dataSource={this.state.comments}
                                 renderItem={(item, idx) => (
                                     <LargeDetailListItem
-                                        avatar={<Avatar src={item.userImg} />}
+                                        avatar={<Avatar src={item.portrait} />}
                                         head={
                                             <div>
                                                 <h4>{item.name}</h4>
-                                                <p>{item.detail}</p>
+                                                <p>{item.comment}</p>
                                             </div>
                                         }
                                         sider={
                                             <div>
-                                                <Rate disabled defaultValue={item.rate} />
-                                                <p className="comment-sider-text">{item.time}</p>
+                                                <Rate disabled defaultValue={item.score} />
+                                                <p className="comment-sider-text">{item.score_time}</p>
                                             </div>
                                         }
                                         body={
                                             <div>
                                                 {
-                                                    item.imgs.map(img => {
+                                                    item.photos &&
+                                                    item.photos.map(img => {
                                                         return (
                                                             <div className="comment-imgContainer">
                                                                 <img src={img} alt="" />
@@ -302,7 +345,7 @@ class ActivityDetail extends Component {
                                     onChange={this.handleUploadChange}
                                     beforeUpload={this.beforeUpload}
                                 >
-                                    {this.state.editModal.avatarUrl ? <img src={this.state.editModal.avatarUrl} alt="" style={{maxWidth:'100px'}} /> : uploadButton}
+                                    {this.state.editModal.avatarUrl ? <img src={this.state.editModal.avatarUrl} alt="" style={{ maxWidth: '100px' }} /> : uploadButton}
                                 </Upload>
                             )}
                         </FormItem>

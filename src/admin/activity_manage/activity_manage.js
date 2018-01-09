@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './activity_manage.less';
-import { Button, Avatar, Row, Col, Form, Input, Radio, DatePicker, Tag, Badge, Table, Divider, Pagination, message, Select } from 'antd';
+import { Button, Avatar, Row, Col, Form, Input, Radio, DatePicker, Tag, Badge, Table, Divider, Pagination, message, Select,Modal } from 'antd';
 import numeral from 'numeral';
 import { activity_status } from '../../config';
 import DescriptionList from 'ant-design-pro/lib/DescriptionList';
@@ -9,6 +9,7 @@ const { Description } = DescriptionList;
 const FormItem = Form.Item;
 const Option = Select.Option;
 const RangePicker = DatePicker.RangePicker;
+const confirm = Modal.confirm;
 
 
 class ActivityManage extends Component {
@@ -105,6 +106,27 @@ class ActivityManage extends Component {
             return state;
         }, this.getActData);
     }
+    handleEditAct = (row)=>{
+        this.props.history.push('/activity-detail/'+row.id)
+    }
+    handleCancelAct = (row)=>{
+        let me = this;
+        confirm({
+            title: `确定取消活动 ${row.name} ?`,
+            onOk() {
+                req({
+                    url: '/api/cancelAct',
+                    type:'post',
+                    params: { actId:row.id }
+                }).then((data) => {
+                    message.success('取消活动成功');
+                    me.getActData();
+                }).catch((err) => {
+                    message.error(err.message)
+                })
+            }
+        });
+    }
     render() {
         const { getFieldDecorator } = this.props.form;
         return (
@@ -188,13 +210,13 @@ class ActivityManage extends Component {
                     width: '150px',
                     render: (text, record) => (
                         <span>
-                            <a href="#">编辑</a>
+                            <Button size="small" onClick={this.handleEditAct.bind(this,record)}  >查看</Button>
                             <Divider type="vertical" />
-                            <a href="#">取消活动</a>
+                            <Button disabled={record.status != 0 && record.status != 1 && record.status != 2}  size="small" onClick={this.handleCancelAct.bind(this,record)} >取消活动</Button>
                         </span>
                     ),
                 }]} dataSource={this.state.activities}
-                    expandedRowRender={record => <p style={{ margin: 0 }}>
+                    expandedRowRender={record => <div style={{ margin: 0 }}>
                         <DescriptionList size="small">
                             <Description term="创建时间">{record.create_time}</Description>
                             <Description term="受助人数">{record.recipient_number}</Description>
@@ -206,7 +228,7 @@ class ActivityManage extends Component {
                                 })
                             }</Description>
                         </DescriptionList>
-                    </p>}
+                    </div>}
                     pagination={this.state.pagination} />
             </div>
         );

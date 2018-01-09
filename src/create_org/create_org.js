@@ -23,17 +23,36 @@ class CreateOrgForm extends React.Component {
     handleSubmit = (e) => {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
-            if (!err) {
-                console.log(values);
-            }
+            if (err) return;
+            console.log(values);
+            req({
+                url: '/api/createOrg',
+                type: 'post',
+                params: {
+                    logo: this.state.avatarUrl,
+                    name: values.name,
+                    slogan: values.slogan,
+                    tags: values.tags.join(',')
+                }
+            }).then((data) => {
+                window.location=`/admin/${data.orgId}#/activity-manage`
+            }).catch((err) => {
+                message.error(err.message);
+            })
         });
     }
     handleUploadChange = ({ file, fileList, event }) => {
         if (file.status == 'done') {
             message.success('上传成功');
-
+            this.setState({
+                avatarUrl:file.response,
+                isAvatarUploading:false
+            })
         } else if (file.status == 'error') {
             message.error('上传失败');
+            this.setState({
+                isAvatarUploading:false
+            })
         }
     }
     componentWillMount() {
@@ -72,7 +91,7 @@ class CreateOrgForm extends React.Component {
             </div>
         );
         return (
-            <Layout class="create-org">
+            <Layout className="create-org">
                 <CHeader />
                 <Content className="login-content">
                     <div className="form-wrapper">
@@ -105,19 +124,19 @@ class CreateOrgForm extends React.Component {
                                         { max: 30, message: '不超过30个字符' },
                                     ]
                                 })(
-                                    <Input prefix={<Icon style={{ color: 'rgba(0,0,0,.25)' }} />} />
+                                    <Input />
                                     )}
                             </FormItem>
                             <FormItem
                                 {...formItemLayout}
                                 label="slogan">
-                                {getFieldDecorator('gender', {
+                                {getFieldDecorator('slogan', {
                                     rules: [
                                         { required: true, message: '请输入slogan' },
                                         { max: 50, message: '不超过50个字符' },
                                     ],
                                 })(
-                                    <Input prefix={<Icon style={{ color: 'rgba(0,0,0,.25)' }} />} />
+                                    <Input />
                                     )}
                             </FormItem>
                             <FormItem
@@ -127,12 +146,16 @@ class CreateOrgForm extends React.Component {
                                     rules: [{ required: true, message: '请选择组织类型' }]
                                 })(
                                     <Select
-                                        mode="tags"
-                                        style={{ width: '70%' }}
+                                    showSearch
+                                    mode="multiple"
+                                    optionFilterProp="children"
+                                    placeholder="请选择类型"
+                                    filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
+                                    style={{ width: '70%' }}
                                     >
                                         {
                                             this.state.typeList.map(type => {
-                                                return <Option key={type.id} value={type.id}>{type.name}</Option>
+                                                return <Option key={type.id}>{type.name}</Option>
                                             })
                                         }
                                     </Select>

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './activity.less';
-import { Avatar, Form, Input, Button, Icon, Popover, Tabs, List, Row, Col, Badge, DatePicker, Divider, Select, Tag, message } from 'antd';
+import { Avatar, Form, Input, Button, Icon, Popover, Tabs, List, Row, Col, Badge, DatePicker, Divider, Select, Tag, message, Modal, Rate, Upload, InputNumber } from 'antd';
 import TagSelect from 'ant-design-pro/lib/TagSelect';
 import { req } from '../../helper';
 let ACTIVITYS_STATUS = require('../../config.json').activity_status;
@@ -8,6 +8,8 @@ const { TabPane } = Tabs;
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 const FormItem = Form.Item;
+const confirm = Modal.confirm;
+const { TextArea } = Input;
 
 class Activity extends Component {
     constructor(props) {
@@ -18,9 +20,17 @@ class Activity extends Component {
                 startTime: '',
                 endTime: ''
             },
+            scoreModal: {
+                actId: '',
+                actName: '',
+                show: false,
+                isAvatarUploading: false,
+                avatarUrl: "",
+                fileList: []
+            },
             loading: false,
             tabKey: '0',
-            showTab:true,
+            showTab: true,
             data: [],
             pagination: {
                 pageSize: 15,
@@ -44,44 +54,23 @@ class Activity extends Component {
     componentWillMount() {
         this.getData();
     }
-    handleSearch = () => {
-        let values = this.props.form.getFieldsValue();
-        console.log('====================================');
-        console.log(values);
-        console.log('====================================');
-        if(!values.name && !values.date){
-            this.setState({
-                showTab:true
-            })
-        }
-        this.setState((state) => {
-            state.pagination.current = 1;
-            state.form.name = values.name || '';
-            state.form.startTime = values.date && values.date[0].format('YYYY-MM-DD H:m:s') || '';
-            state.form.endTime = values.date && values.date[1].format('YYYY-MM-DD H:m:s') || '';
-            if(values.name || values.date){
-                state.showTab = false
-            }else{
-                state.showTab = true
+    handleQuit = (row) => {
+        let me = this;
+        confirm({
+            title: `确定退出活动 ${row.name} ?`,
+            onOk() {
+                req({
+                    url: '/api/quitAct',
+                    type: 'post',
+                    params: { actId: row.id }
+                }).then((data) => {
+                    message.success('退出活动成功');
+                    me.getData();
+                }).catch((err) => {
+                    message.error(err.message)
+                })
             }
-            return state;
-        }, this.getData)
-    }
-    handleReset = () => {
-        this.props.form.setFieldsValue({
-            name: '',
-            date: ''
-        })
-        this.setState((state) => {
-            state.pagination.current = 1;
-            state.form = {
-                name: '',
-                startTime: '',
-                endTime: ''
-            }
-            state.showTab = true;
-            return state;
-        }, this.getData)
+        });
     }
     getData = () => {
         this.setState({ loading: true })
@@ -90,9 +79,9 @@ class Activity extends Component {
             params: {
                 status: this.state.tabKey,
                 page: this.state.pagination.current,
-                name:this.state.form.name,
-                startTime:this.state.form.startTime,
-                endTime:this.state.form.endTime
+                name: this.state.form.name,
+                startTime: this.state.form.startTime,
+                endTime: this.state.form.endTime
             }
         }).then((data) => {
             this.setState({ loading: false })
@@ -107,8 +96,95 @@ class Activity extends Component {
             message.error(err.message)
         })
     }
+    beforeUpload = (file) => {
+        this.setState((state) => {
+            state.scoreModal.isAvatarUploading = true;
+            return state;
+        })
+    }
+    handleUploadChange = () => {
+        let uid = -1;
+        return ({ file, fileList, event }) => {
+            if (file.status == 'done') {
+                message.success('上传成功');
+                this.setState((state) => {
+                    let newList = state.scoreModal.fileList.slice(0);
+                    newList.push({
+                        uid: uid--,      // 文件唯一标识，建议设置为负数，防止和内部产生的 id 冲突
+                        status: 'done', // 状态有：uploading done error removed
+                        response: file.response, // 服务端响应内容
+                        url: file.response
+                    })
+                    state.scoreModal.fileList = newList;
+                    return state;
+                })
+            } else if (file.status == 'error') {
+                message.error('上传失败');
+                this.setState(state => {
+                    state.scoreModal.isAvatarUploading = false;
+                    return state;
+                });
+            }
+        }
+    }
+    handleScore = (row) => {
+        this.setState((state) => {
+            state.scoreModal.show = true;
+            state.scoreModal.actId = row.id;
+            state.scoreModal.actName = row.name;
+            return state;
+        })
+    }
+    handleScoreOk = () => {
+        let scoreModal = this.state.scoreModal;
+        this.props.form.validateFields((err, values) => {
+            if (err) return;
+            console.log(values);
+            req({
+                url: '/api/score',
+                type: 'post',
+                params: {
+                    actId: scoreModal.actId,
+                    comment: values.comment || '',
+                    score: values.score
+                }
+            }).then((data) => {
+                message.success('评价成功');
+                this.getData();
+                this.setState((state) => {
+                    state.scoreModal.show = false;
+                    return state;
+                })
+            }).catch((err) => {
+                message.error(err.message);
+            })
+        })
+    }
+    handleScoreCancel = () => {
+
+    }
     render() {
         const { getFieldDecorator } = this.props.form;
+        const breadcrumbList = [{
+            title: '活动管理',
+            href: '#/activity-manage',
+        }, {
+            title: this.state.name
+        }];
+        const formItemLayout = {
+            labelCol: {
+                sm: { span: 4 },
+            },
+            wrapperCol: {
+                sm: { span: 20 },
+            },
+        };
+        const uploadButton = (
+            <div>
+                <Icon type="plus" />
+                <div className="ant-upload-text">Upload</div>
+            </div>
+        );
         return (
             <div className="c-activity">
                 {/* <Form
@@ -140,11 +216,21 @@ class Activity extends Component {
                     itemLayout="horizontal"
                     dataSource={this.state.data}
                     renderItem={item => (
-                        <List.Item actions={[<a>退出</a>]}>
+                        <List.Item actions={
+                            [
+                                this.state.tabKey == '0' ?
+                                    <Button size="small" onClick={this.handleQuit.bind(this, item)}>退出</Button> :
+                                    item.status === 3 ?
+                                        !item.isScored ?
+                                            <Button type="primary" size="small" onClick={this.handleScore.bind(this, item)} >评价</Button> :
+                                            <span>已评价</span> :
+                                        null
+                            ]
+                        }>
                             <List.Item.Meta
                                 title={
                                     <span>
-                                        <a href={`/activity/${item.id}`} style={{marginRight:'10px'}}>{item.name}</a>
+                                        <a href={`/activity/${item.id}`} style={{ marginRight: '10px' }}>{item.name}</a>
                                         {
                                             item.tags.map(item => {
                                                 return <Tag color="cyan" key={item.tagId}>{item.tagName}</Tag>
@@ -172,6 +258,45 @@ class Activity extends Component {
                         </List.Item>
                     )}
                 />
+                <Modal title={`评价活动${this.state.scoreModal.actName}`}
+                    visible={this.state.scoreModal.show}
+                    onOk={this.handleScoreOk}
+                    onCancel={this.handleScoreCancel}
+                >
+                    <Form>
+                        <FormItem
+                            {...formItemLayout}
+                            label="打分">
+                            {getFieldDecorator('score', {
+                                rules: [{ required: true, message: '请打分' }]
+                            })(
+                                <Rate />
+                                )}
+                        </FormItem>
+                        <FormItem
+                            {...formItemLayout}
+                            label="评论">
+                            {getFieldDecorator('comment')(
+                                <TextArea rows={4} />
+                            )}
+                        </FormItem>
+                        <FormItem
+                            {...formItemLayout}
+                            label="照片">
+                            {getFieldDecorator('avatar')(
+                                <Upload
+                                    action="/api/uploadPhoto"
+                                    listType="picture-card"
+                                    fileList={this.state.scoreModal.fileList}
+                                    beforeUpload={this.beforeUpload}
+                                    onChange={this.handleUploadChange()}
+                                >
+                                    {this.state.scoreModal.fileList.length >= 4 ? null : uploadButton}
+                                </Upload>
+                            )}
+                        </FormItem>
+                    </Form>
+                </Modal>
             </div>
         );
     }

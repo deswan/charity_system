@@ -20,6 +20,7 @@ class Admin extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            current:'1',
             user: {},
             orgs: [],
             adminOrgs: [],
@@ -30,6 +31,7 @@ class Admin extends Component {
     componentWillMount = () => {
         let path = window.location.href.slice(0, window.location.href.lastIndexOf('#'));
         let id = parseInt(path.slice(path.lastIndexOf('/') + 1));
+        console.log(path,id)
         req({
             url: '/api/getUser'
         }).then((data) => {
@@ -58,8 +60,13 @@ class Admin extends Component {
             message.error(err.message)
         })
     }
-    handleOpen = (page) => {
-        window.open('/' + page + '.html', '_self')
+    handleOpen = ({key}) => {
+        window.open('/' + key, '_self')
+    }
+    handleMenuClick = (key)=>{
+        this.setState({
+            current:key
+        })
     }
     render() {
         return (
@@ -68,7 +75,7 @@ class Admin extends Component {
                     <Header>
                         <div className="header-title">
                             <span style={{ marginRight: '20px' }}>义工组织管理</span>
-                            <Avatar src={this.state.orgName} className="middle-avatar" /><span>{this.state.orgImg}</span>
+                            <Avatar src={this.state.orgImg} className="middle-avatar" /><span>{this.state.orgName}</span>
                         </div>
                         <Menu
                             mode="horizontal"
@@ -76,17 +83,17 @@ class Admin extends Component {
                             className="header-menu"
                             onClick={this.handleOpen}
                         >
-                            <SubMenu style={{ float: 'right' }} className="header-submenu" title="管理">
+                            <SubMenu style={{ float: 'right' }} title="管理">
                                 {
                                     this.state.adminOrgs.map(i => {
-                                        return <Menu.Item key={`admin/${i.id}`}>
+                                        return <Menu.Item key={`admin/${i.id}#/activity-manage`}>
                                             <Avatar src={i.img} size="small" className="middle-avatar" />
                                             <span>{i.name}</span>
                                         </Menu.Item>
                                     })
                                 }
                             </SubMenu>
-                            <SubMenu style={{ float: 'right' }} className="header-submenu" title={
+                            <SubMenu style={{ float: 'right' }} title={
                                 <div>
                                     <Avatar src={this.state.user.img} style={{ verticalAlign: 'middle', marginRight: '10px' }} />
                                     <span>{this.state.user.name}</span>
@@ -127,9 +134,9 @@ class Admin extends Component {
                         <Layout style={{ background: '#fff', height: '100%' }}>
                             <Sider width={300} style={{ backgroundColor: 'white' }}>
                                 <Menu
+                                    onClick={this.handleMenuClick}
                                     mode="vertical"
-                                    selectedKeys={['1']}
-                                    style={{ height: '100%', position: 'fixed', width: '300px' }}
+                                    selectedKeys={[this.state.current]}
                                 >
                                     <Menu.Item key="1">
                                         <Link to="/activity-manage">

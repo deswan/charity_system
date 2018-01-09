@@ -48,12 +48,12 @@ class PersonalInformation extends Component {
                                     defaultOpenKeys={['org-list']}
                                     style={{ height: '100%' }}
                                 >
-                                    <Menu.Item key="0">
+                                    {/* <Menu.Item key="0">
                                         <Link to="/profile">
                                             <Icon type="pie-chart" />
                                             <span>个人信息</span>
                                         </Link>
-                                    </Menu.Item>
+                                    </Menu.Item> */}
                                     <Menu.Item key="1">
                                         <Link to="/activities">
                                             <Icon type="pie-chart" />

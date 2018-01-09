@@ -55,7 +55,21 @@ export default class CHeader extends Component {
     }
     handleOpen = ({ key }) => {
         if (key == 'notice') return;
+        if(key == 'logout'){
+            return this.handleLogout();
+        }
         window.open('/' + key, '_self')
+    }
+    handleLogout = ()=>{
+        req({
+            url: '/api/logout'
+        }).then((data) => {
+            if (data.code == 0) {
+                window.location = '/';
+            }
+        }).catch(err => {
+            message.error(err.message)
+        })
     }
     render() {
         return (
@@ -75,7 +89,7 @@ export default class CHeader extends Component {
                             <SubMenu style={{ float: 'right' }} className="header-submenu" title="管理">
                                 {
                                     this.state.adminOrgs.map(i => {
-                                        return <Menu.Item key={`admin/${i.id}`}>
+                                        return <Menu.Item key={`admin/${i.id}#/activity-manage`}>
                                             <Avatar src={i.img} size="small" className="middle-avatar" />
                                             <span>{i.name}</span>
                                         </Menu.Item>
@@ -93,10 +107,10 @@ export default class CHeader extends Component {
                                         <span>{this.state.user.name}</span>
                                     </div>
                                 }>
-                                    <Menu.Item key="personal_information/#/profile">
+                                    {/* <Menu.Item key="personal_information/#/profile">
                                         <Icon type="pie-chart" />
                                         <span>个人信息</span>
-                                    </Menu.Item>
+                                    </Menu.Item> */}
                                     <Menu.Item key="personal_information/#/activities">
                                         <Icon type="pie-chart" />
                                         <span>我的活动</span>
@@ -113,7 +127,7 @@ export default class CHeader extends Component {
                                             })
                                         }
                                     </SubMenu>
-                                    <Menu.Item key="/createorg">
+                                    <Menu.Item key="createorg">
                                         <Icon type="pie-chart" />
                                         <span>创建组织</span>
                                     </Menu.Item>
@@ -126,28 +140,26 @@ export default class CHeader extends Component {
                             : (<Menu.Item key="login" style={{ float: 'right' }}>登陆</Menu.Item>)
                     }
                     {
-                        this.state.notice.length && (
-                            <Menu.Item key="notice" style={{ float: 'right' }} className="notice-icon">
-                                <NoticeIcon count={this.state.notice.length}>
+                        <Menu.Item key="notice" style={{ float: 'right' }} className="notice-icon">
+                            <NoticeIcon count={this.state.notice.length}>
                                 {
                                     [
                                         <NoticeIcon.Tab
-                                        list={this.state.notice.map(i=>{
-                                            return {
-                                                title:i.type == 0 ? '活动进度提醒' : '申请结果',
-                                                description:i.type == 0 ? `活动 ${i.target_name} 状态已变为 ${i.statusText}` : `您的申请加入 ${i.target_name} ${i.target_type == 0 ? '组织' : '活动'} 已被 ${i.statusText}`,
-                                                datetime:i.create_time
-                                            }
-                                        })}
-                                        title="通知"
-                                        emptyText="你已查看所有通知"
-                                        emptyImage="https://gw.alipayobjects.com/zos/rmsportal/wAhyIChODzsoKIOBHcBk.svg"
-                                    />
+                                            list={this.state.notice.map(i => {
+                                                return {
+                                                    title: i.type == 0 ? '活动进度提醒' : '申请结果',
+                                                    description: i.type == 0 ? `活动 ${i.target_name} 状态已变为 ${i.statusText}` : `您的申请加入 ${i.target_name} ${i.target_type == 0 ? '组织' : '活动'} 已被 ${i.statusText}`,
+                                                    datetime: i.create_time
+                                                }
+                                            })}
+                                            title="通知"
+                                            emptyText="你已查看所有通知"
+                                            emptyImage="https://gw.alipayobjects.com/zos/rmsportal/wAhyIChODzsoKIOBHcBk.svg"
+                                        />
                                     ]
                                 }
-                                </NoticeIcon>
-                            </Menu.Item>
-                        )
+                            </NoticeIcon>
+                        </Menu.Item>
                     }
                 </Menu>
             </Header>

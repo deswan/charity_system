@@ -29,9 +29,15 @@ class RegistryForm extends React.Component {
     handleUploadChange = ({ file, fileList, event }) => {
         if (file.status == 'done') {
             message.success('上传成功');
-
+            this.setState({
+                avatarUrl:file.response,
+                isAvatarUploading:false
+            })
         } else if (file.status == 'error') {
             message.error('上传失败');
+            this.setState({
+                isAvatarUploading:false
+            })
         }
     }
     render() {
