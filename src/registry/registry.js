@@ -5,6 +5,7 @@ import React, { Component } from 'react';
 import './registry.less';
 import CHeader from '../components/CHeader/CHeader';
 import { Form, Icon, Input, Button, Checkbox, Layout, Tabs, DatePicker, Cascader, Upload, message,Radio } from 'antd';
+import { req } from '../helper';
 const { Content, Sider } = Layout;
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
@@ -23,6 +24,24 @@ class RegistryForm extends React.Component {
         this.props.form.validateFields((err, values) => {
             if (!err) {
                 console.log(values);
+                req({
+                    url: '/api/registry',
+                    type: 'post',
+                    params: {
+                        avatar: this.state.avatarUrl,
+                        name: values.name,
+                        birthday: values.birthday.format('YYYY-MM-DD'),
+                        gender: values.gender,
+                        id_card: values.id_card,
+                        email: values.email,
+                        phone: values.phone,
+                        password: values.password
+                    }
+                }).then((data) => {
+                    window.location=`/`
+                }).catch((err) => {
+                    message.error(err.message);
+                })
             }
         });
     }
@@ -58,21 +77,6 @@ class RegistryForm extends React.Component {
                 },
             },
         };
-        const options = [{
-            value: 'zhejiang',
-            label: 'Zhejiang',
-            children: [{
-                value: 'hangzhou',
-                label: 'Hangzhou'
-            }],
-        }, {
-            value: 'jiangsu',
-            label: 'Jiangsu',
-            children: [{
-                value: 'nanjing',
-                label: 'Nanjing'
-            }],
-        }];
         const uploadButton = (
             <div>
                 <Icon type={this.state.isAvatarUploading ? 'loading' : 'plus'} />
@@ -87,13 +91,13 @@ class RegistryForm extends React.Component {
             }
         }
         return (
-            <Layout class="registry">
+            <Layout className="registry">
                 <CHeader />
                 <Content className="login-content">
                     <div className="form-wrapper">
                         <Form onSubmit={this.handleSubmit}>
                             <FormItem {...tailFormItemLayout}>
-                                <span class="form-title">注册成为义工</span>
+                                <span className="form-title">注册成为义工</span>
                             </FormItem>
                             <FormItem
                                 {...formItemLayout}
@@ -161,18 +165,6 @@ class RegistryForm extends React.Component {
                                     ],
                                 })(
                                     <DatePicker />
-                                    )}
-                            </FormItem>
-                            <FormItem
-                                {...formItemLayout}
-                                label="籍贯"
-                            >
-                                {getFieldDecorator('native', {
-                                    rules: [
-                                        { required: true, message: '请选择籍贯' },
-                                    ],
-                                })(
-                                    <Cascader options={options} />
                                     )}
                             </FormItem>
                             <FormItem

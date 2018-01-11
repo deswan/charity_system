@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './activity_manage.less';
-import { Button, Avatar, Row, Col, Form, Input, Radio, DatePicker, Tag, Badge, Table, Divider, Pagination, message, Select,Modal } from 'antd';
+import { Button, Avatar, Row, Col, Form, Input, Radio, DatePicker, Tag, Badge, Table, Divider, Pagination, message, Select, Modal } from 'antd';
 import numeral from 'numeral';
 import { activity_status } from '../../config';
 import DescriptionList from 'ant-design-pro/lib/DescriptionList';
@@ -106,18 +106,18 @@ class ActivityManage extends Component {
             return state;
         }, this.getActData);
     }
-    handleEditAct = (row)=>{
-        this.props.history.push('/activity-detail/'+row.id)
+    handleEditAct = (row) => {
+        this.props.history.push('/activity-detail/' + row.id)
     }
-    handleCancelAct = (row)=>{
+    handleCancelAct = (row) => {
         let me = this;
         confirm({
             title: `确定取消活动 ${row.name} ?`,
             onOk() {
                 req({
                     url: '/api/cancelAct',
-                    type:'post',
-                    params: { actId:row.id }
+                    type: 'post',
+                    params: { actId: row.id, orgId: me.state.id }
                 }).then((data) => {
                     message.success('取消活动成功');
                     me.getActData();
@@ -181,8 +181,7 @@ class ActivityManage extends Component {
                 <Table loading={this.state.loading} rowKey="id" columns={[{
                     title: '活动名称',
                     width: '150px',
-                    dataIndex: 'name',
-                    render: text => <a href="#">{text}</a>,
+                    dataIndex: 'name'
                 }, {
                     title: '开始时间',
                     width: '120px',
@@ -210,9 +209,9 @@ class ActivityManage extends Component {
                     width: '150px',
                     render: (text, record) => (
                         <span>
-                            <Button size="small" onClick={this.handleEditAct.bind(this,record)}  >查看</Button>
+                            <Button size="small" onClick={this.handleEditAct.bind(this, record)}  >查看</Button>
                             <Divider type="vertical" />
-                            <Button disabled={record.status != 0 && record.status != 1 && record.status != 2}  size="small" onClick={this.handleCancelAct.bind(this,record)} >取消活动</Button>
+                            <Button disabled={record.status != 0 && record.status != 1 && record.status != 2} size="small" onClick={this.handleCancelAct.bind(this, record)} >取消活动</Button>
                         </span>
                     ),
                 }]} dataSource={this.state.activities}

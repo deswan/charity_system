@@ -90,7 +90,7 @@ export default class CHeader extends Component {
                                 {
                                     this.state.adminOrgs.map(i => {
                                         return <Menu.Item key={`admin/${i.id}#/activity-manage`}>
-                                            <Avatar src={i.img} size="small" className="middle-avatar" />
+                                            <Avatar src={i.logo} size="small" className="middle-avatar" />
                                             <span>{i.name}</span>
                                         </Menu.Item>
                                     })

@@ -30,7 +30,7 @@ class CreateActivity extends Component {
                     params: {
                         orgId: this.state.id,
                         startDate: values.date[0].format('YYYY-MM-DD'),
-                        endDate: values.date[0].format('YYYY-MM-DD'),
+                        endDate: values.date[1].format('YYYY-MM-DD'),
                         name: values.name,
                         avatar: this.state.avatarUrl,
                         location: values.location,

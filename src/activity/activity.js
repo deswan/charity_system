@@ -24,28 +24,28 @@ class ActivityDetail extends Component {
         this.state = {
             userStatus: 'NOT_LOGIN',
             isShowJoin: false,
-            id: 23,
-            name: 'asdsda',
-            img: require('../img/img.jpg'),
+            id: 0,
+            name: '',
+            img: '',
             tags: [],
             status: 0,
-            start_time: '2017-10-17 11:11:12',
-            location: '广州市广东工业大学',
-            recipient_number: 123,
-            recruit_number: 3243,
-            joinedCount: 123,
-            orgImg: require('../img/img.jpg'),
+            start_time: '',
+            location: '',
+            recipient_number: 0,
+            recruit_number: 0,
+            joinedCount: 0,
+            orgImg: '',
             orgName: '爱之花',
-            orgSlogan: '啊啊啊啊啊啊啊啊啊啊啊啊啊啊',
-            orgHelpedCount: 134432,
-            create_time: '2017-10-17 11:11:12',
+            orgSlogan: '',
+            orgHelpedCount: 0,
+            create_time: '',
             volunteers: [],
             sponsors: [],
             comments: []
         }
     }
     handleOpen = (page) => {
-        window.open('/' + page + '.html', '_self')
+        window.open('/' + page, '_self')
     }
     componentWillMount = () => {
         let id = parseInt(window.location.href.slice(window.location.href.lastIndexOf('/') + 1));
@@ -63,7 +63,8 @@ class ActivityDetail extends Component {
             isShowJoin: visible
         });
     }
-    handleSubmitApply = () => {
+    handleSubmitApply = (e) => {
+        e.preventDefault();
         this.props.form.validateFields((err, values) => {
             if (!err) {
                 req({
@@ -111,7 +112,7 @@ class ActivityDetail extends Component {
                                     <Popover
                                         content={
                                             this.state.userStatus == 'NOT_JOIN' ?
-                                                (<Form onSubmit={this.handleSubmit}>
+                                                (<Form onSubmit={this.handleSubmitApply}>
                                                     <FormItem
                                                         label="申请理由"
                                                         {...formItemLayout}
@@ -124,11 +125,11 @@ class ActivityDetail extends Component {
                                                             )}
                                                     </FormItem>
                                                     <div style={{ textAlign: 'right' }}>
-                                                        <Button htmlType="submit" onClick={this.handleSubmitApply} type="primary" size="small" >申请</Button>
+                                                        <Button htmlType="submit" type="primary" size="small" >申请</Button>
                                                     </div>
                                                 </Form>) :
                                                 this.state.userStatus == 'NOT_ORG' ?
-                                                    (<span>您还未加入 {this.state.orgName} ，<a onClick={this.handleOpen.bind(this, 'org/' + this.orgId)}>现在加入</a></span>) :
+                                                    (<span>您还未加入该活动所属的 {this.state.orgName} 义工组织 ，<a onClick={this.handleOpen.bind(this, 'org/' + this.state.orgId)}>现在加入</a></span>) :
                                                     this.state.userStatus == 'NOT_LOGIN' ?
                                                         (<span>您还未登陆，现在 <a onClick={this.handleOpen.bind(this, 'login')}>登陆</a></span>) : ''
                                         }

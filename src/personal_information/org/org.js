@@ -120,7 +120,10 @@ class Org extends Component {
                     itemLayout="horizontal"
                     dataSource={this.state.myActs}
                     renderItem={item => (
-                        <List.Item actions={[<a onClick={this.quitAct.bind(this, item.id, item.name)}>退出</a>]}>
+                        <List.Item actions={
+                            (item.status != 3 && item.status != 4) ?
+                            [<a onClick={this.quitAct.bind(this, item.id, item.name)}>退出</a>] : null
+                            }>
                             <List.Item.Meta
                                 title={
                                     <span>

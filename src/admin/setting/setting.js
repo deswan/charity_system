@@ -12,18 +12,13 @@ class Setting extends Component {
         this.state = {
             isAvatarUploading: false,
             avatarUrl: "",
-            typeList: [
-                {
-                    id: 1,
-                    name: 'tag1'
-                }
-            ],
+            typeList: [],
             name: {
-                value: 123,
+                value: '',
                 isEdit: false
             },
             slogan: {
-                value: 123,
+                value: '',
                 isEdit: false
             },
             tags: {
@@ -39,15 +34,25 @@ class Setting extends Component {
         let path = window.location.href.slice(0, window.location.href.lastIndexOf('#'));
         let id = parseInt(path.slice(path.lastIndexOf('/') + 1));
         this.setState({ id }, this.getData)
+        req({
+            url: '/api/getAllTags'
+        }).then((data) => {
+            this.setState((state) => {
+                state.typeList = data;
+                return state;
+            })
+        }).catch((err) => {
+            message.error(err.message);
+        })
     }
-    getData = ()=>{
+    getData = () => {
         req({
             url: '/api/getOrgProfileById',
             params: {
                 orgId: this.state.id,
             }
         }).then((data) => {
-            this.setState(state=>{
+            this.setState(state => {
                 state.avatarUrl = data.logo;
                 state.name.value = data.name;
                 state.slogan.value = data.slogan;
@@ -57,23 +62,35 @@ class Setting extends Component {
         }).catch((err) => {
             message.error(err.message);
         })
+
     }
-    beforeUpload = (file)=>{
+    beforeUpload = (file) => {
         this.setState({
-            isAvatarUploading:true
+            isAvatarUploading: true
         })
-      }
+    }
     handleUploadChange = ({ file, fileList, event }) => {
         if (file.status == 'done') {
             message.success('上传成功');
-            this.setState({
-                avatarUrl:file.response,
-                isAvatarUploading:false
+            req({
+                url: '/api/updateOrgProfile?orgId=' + this.state.id,
+                type: 'post',
+                params: {
+                    logo: file.response
+                }
+            }).then((data) => {
+                message.success('修改成功');
+                this.setState({
+                    avatarUrl: file.response,
+                    isAvatarUploading: false
+                })
+            }).catch((err) => {
+                message.error(err.message);
             })
         } else if (file.status == 'error') {
             message.error('上传失败');
             this.setState({
-                isAvatarUploading:false
+                isAvatarUploading: false
             })
         }
     }
@@ -84,25 +101,35 @@ class Setting extends Component {
         })
     }
     handleCommit = (field) => {
-        this.props.form.validateFields([field],(err,values)=>{
-            if(err) return;
+        this.props.form.validateFields([field], (err, values) => {
+            if (err) return;
             console.log(values);
             req({
-                url: '/api/updateOrgProfile?orgId='+this.state.id,
-                type:'post',
+                url: '/api/updateOrgProfile?orgId=' + this.state.id,
+                type: 'post',
                 params: {
-                    [field]:values[field]
+                    [field]: field == 'tags' ? values[field].join(',') : values[field]
                 }
             }).then((data) => {
-                this.setState(state=>{
-                    state[field].value = values[field];
+                message.success('修改成功');
+                this.setState(state => {
+                        state[field].value = field == 'tags' ? values[field].map(tagId=>{
+                            let idx = this.state.typeList.findIndex(tag=>{
+                                console.log(tag.id,tagId,tag.id == tagId)
+                                return tag.id == tagId;
+                            })
+                            console.log(idx)
+                            return {
+                                tagId,
+                                tagName:this.state.typeList[idx].name
+                            }
+                        }) :values[field];
                     state[field].isEdit = false
                     return state;
                 })
             }).catch((err) => {
                 message.error(err.message);
             })
-
         })
     }
     handleCancel = (field) => {
@@ -216,17 +243,20 @@ class Setting extends Component {
                                 <span>
                                     {getFieldDecorator('tags', {
                                         rules: [{ required: true, message: '请选择组织类型' }],
-                                        initialValue: this.state.tags.value.map(tag=>{
-                                            return tag.id
-                                        }).join(',')
+                                        initialValue: this.state.tags.value.map(tag => {
+                                            return tag.tagId
+                                        })
                                     })(
                                         <Select
-                                            mode="tags"
+                                            showSearch
+                                            mode="multiple"
+                                            filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
+                                            optionFilterProp="children"
                                             style={{ width: '70%' }}
                                         >
                                             {
                                                 this.state.typeList.map(type => {
-                                                    return <Option key={type.id} value={type.id}>{type.name}</Option>
+                                                    return <Option key={type.id}>{type.name}</Option>
                                                 })
                                             }
                                         </Select>

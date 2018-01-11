@@ -83,13 +83,13 @@ class App extends Component {
       <div>
         <Layout style={{ background: 'white' }}>
           <CHeader pageName="index" />
-          <Content class="content">
+          <Content className="content">
           {
             this.state.tags && 
             <TagSelect onChange={this.handleTagChange} expandable style={{ marginBottom: '20px' }}>
               {
                 this.state.tags.map(item => {
-                  return <TagSelect.Option value={item.id}>{item.name}</TagSelect.Option>
+                  return <TagSelect.Option value={item.id} key={item.id}>{item.name}</TagSelect.Option>
                 })
               }
             </TagSelect>
@@ -114,9 +114,9 @@ class App extends Component {
                   dataSource={this.state.reviewActivities}
                   renderItem={(item, idx) => (
                     <List.Item>
-                      <div onClick={this.handleOpen.bind(this, 'activity/' + item.id)} class="previous-act" style={{ backgroundImage: 'url(' + item.img + ')' }}>
-                        <div class="previous-act-layer">
-                          <span class="previous-act-layer-text">{item.name}</span>
+                      <div onClick={this.handleOpen.bind(this, 'activity/' + item.id)} className="previous-act" style={{ backgroundImage: 'url(' + item.img + ')' }}>
+                        <div className="previous-act-layer">
+                          <span className="previous-act-layer-text">{item.name}</span>
                         </div>
                       </div>
                     </List.Item>

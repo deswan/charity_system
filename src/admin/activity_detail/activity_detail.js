@@ -29,20 +29,20 @@ class ActivityDetail extends Component {
                 avatarUrl: "",
                 typeList: []
             },
-            id: 23,
-            name: 'asdsda',
-            img: require('../../img/img.jpg'),
+            id: 0,
+            name: '',
+            img: '',
             tags: [],
             status: '0',
-            start_time: '2017-10-17 11:11:12',
-            end_time: '2017-10-17 11:11:12',
-            location: '广州市广东工业大学',
-            recipientCount: 123,
+            start_time: '',
+            end_time: '',
+            location: '',
+            recipientCount: 0,
 
-            recruitCount: 3243,
-            sponsor_count: 132423,
+            recruitCount: 0,
+            sponsor_count: 0,
 
-            create_time: '2017-10-17 11:11:12',
+            create_time: '',
             volunteers: [],
 
             sponsors: [],
@@ -63,12 +63,16 @@ class ActivityDetail extends Component {
         }).catch((err) => {
             message.error(err.message);
         })
-        this.getData();
+        let path = window.location.href.slice(0, window.location.href.lastIndexOf('#'));
+        let id = parseInt(path.slice(path.lastIndexOf('/') + 1));
+        console.log(id)
+        this.setState({ orgId:id }, this.getData)
     }
     getData = () => {
         req({
             url: '/api/getActByIdInAdmin',
             params: {
+                orgId: this.state.orgId,
                 actId: this.props.match.params.id,
             }
         }).then((data) => {
@@ -108,7 +112,8 @@ class ActivityDetail extends Component {
                     name: values.name,
                     location: values.location,
                     recipient_number: values.recipient_number,
-                    tags: values.tags.join(',')
+                    tags: values.tags.join(','),
+                    orgId:this.state.orgId
                 }
             }).then((data) => {
                 message.success('修改成功');
@@ -162,10 +167,10 @@ class ActivityDetail extends Component {
             onOk() {
                 req({
                     url: '/api/cancelAct',
-                    type:'post',
-                    params: { actId:this.state.id }
+                    type: 'post',
+                    params: { actId: me.state.id,orgId:me.state.orgId }
                 }).then((data) => {
-                    message.success('退出活动成功');
+                    message.success('取消活动成功');
                     me.getData();
                 }).catch((err) => {
                     message.error(err.message)
@@ -277,7 +282,7 @@ class ActivityDetail extends Component {
                                         renderItem={(item, idx) => (
                                             <List.Item>
                                                 <List.Item.Meta
-                                                    avatar={<Avatar src={item.img} />}
+                                                    avatar={<Avatar src={item.logo} />}
                                                     title={item.name}
                                                     description={'赞助总金额：' + numeral(item.amount).format('0,0')}
                                                 />

@@ -60,10 +60,24 @@ class Admin extends Component {
             message.error(err.message)
         })
     }
-    handleOpen = ({key}) => {
+    handleOpen = ({ key }) => {
+        if(key == 'logout'){
+            return this.handleLogout();
+        }
         window.open('/' + key, '_self')
     }
-    handleMenuClick = (key)=>{
+    handleLogout = ()=>{
+        req({
+            url: '/api/logout'
+        }).then((data) => {
+            if (data.code == 0) {
+                window.location = '/';
+            }
+        }).catch(err => {
+            message.error(err.message)
+        })
+    }
+    handleMenuClick = ({key})=>{
         this.setState({
             current:key
         })
@@ -95,7 +109,7 @@ class Admin extends Component {
                             </SubMenu>
                             <SubMenu style={{ float: 'right' }} title={
                                 <div>
-                                    <Avatar src={this.state.user.img} style={{ verticalAlign: 'middle', marginRight: '10px' }} />
+                                    <Avatar src={this.state.user.portrait} style={{ verticalAlign: 'middle', marginRight: '10px' }} />
                                     <span>{this.state.user.name}</span>
                                 </div>
                             }>

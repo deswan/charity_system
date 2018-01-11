@@ -10,29 +10,7 @@ class Notice extends Component {
         super(props);
         this.state = {
             loading: false,
-            data: [
-                {
-                    id: 1,
-                    type: 0, //0:义工加入组织申请；1：义工加入活动申请；2：赞助申请
-                    user: {
-                        id: 1,
-                        img: require('../../img/img.jpg'),
-                        name: '花花',
-                        apply_text: 'apply_text1',
-                    },
-                    time: '1996-10-17 12:34:54',
-                    act: {
-                        id: 1,
-                        name: 'act1'
-                    },
-                    sponsor: {
-                        img: require('../../img/img.jpg'),
-                        name: '恒大地产',
-                        money: 10000,
-                        address: '123123123'
-                    }
-                }
-            ]
+            data: []
         }
     }
     handleOpen = (page) => {
@@ -71,7 +49,8 @@ class Notice extends Component {
             params: {
                 id: row.item_id,
                 type: row.type,
-                action: 2
+                action: 2,
+                orgId:this.state.id
             }
         }).then((data) => {
             if (data.code == 0) {
@@ -89,7 +68,8 @@ class Notice extends Component {
             params: {
                 id: row.item_id,
                 type: row.type,
-                action: 1
+                action: 1,
+                orgId:this.state.id
             }
         }).then((data) => {
             if (data.code == 0) {
@@ -128,7 +108,7 @@ class Notice extends Component {
                                 }
                                 description={
                                     (item.type == 0 || item.type == 1) ? `申请理由：${item.user.apply_text}` :
-                                        `赞助人：${item.sponsor.name} 赞助金额：${item.sponsor.money} 联系方式：${item.sponsor.address}`
+                                        `赞助人：${item.sponsor.name} 赞助金额：${item.sponsor.amount} 联系方式：${item.sponsor.address}`
                                 }
                             />
                             <div>{item.time}</div>

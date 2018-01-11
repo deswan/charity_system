@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import registerServiceWorker from '../registerServiceWorker';
 import React, { Component } from 'react';
 import './org.less';
-import { Layout, Menu, Card, List, Button, Avatar, Tag, Row, Col, Badge, Rate,message } from 'antd';
+import { Layout, Menu, Card, List, Button, Avatar, Tag, Row, Col, Badge, Rate, message, Popover, Form,Input } from 'antd';
 import NumberInfo from 'ant-design-pro/lib/NumberInfo';
 import PageHeader from 'ant-design-pro/lib/PageHeader';
 import DescriptionList from 'ant-design-pro/lib/DescriptionList';
@@ -16,21 +16,24 @@ import { req } from '../helper';
 
 const { Header, Content, Footer, Sider } = Layout;
 const { Description } = DescriptionList;
+const FormItem = Form.Item;
+const { TextArea } = Input;
 
-class App extends Component {
+class Org extends Component {
     constructor(props) {
         super(props);
         this.state = {
             id: 23,
-            userStatus:'',
-            name: 'asdsda',
-            img: require('../img/img.jpg'),
-            slogan: '123321',
-            recipientCount: 12414,
-            volunteerCount: 12323,
+            userStatus: 'NOT_LOGIN',
+            name: '',
+            img: '',
+            slogan: '0',
+            recipientCount: 0,
+            volunteerCount: 0,
             tags: [],
             currentActivities: [],
-            previousActivities: []
+            previousActivities: [],
+            isShowJoin:false
         }
     }
     componentWillMount = () => {
@@ -47,7 +50,42 @@ class App extends Component {
     handleOpen = (page) => {
         window.open('/' + page, '_self')
     }
+    handleJoinVisibleChange = (visible) => {
+        this.setState({
+            isShowJoin: visible
+        });
+    }
+    handleSubmitApply = (e) => {
+        e.preventDefault();
+        this.props.form.validateFields((err, values) => {
+            if (!err) {
+                req({
+                    url: '/api/applyOrg',
+                    type: 'post',
+                    params: {
+                        orgId: this.state.id,
+                        text: values['apply-text']
+                    }
+                }).then((data) => {
+                    if (data.code === 0) {
+                        message.success('申请已提交');
+                        this.setState({
+                            isShowJoin: false
+                        });
+                        this.props.form.setFieldsValue({
+                            'apply-text': ''
+                        })
+                    }
+                }).catch((err) => {
+                    message.error(err.message)
+                })
+            }
+        })
+    }
     render() {
+        const { getFieldDecorator } = this.props.form;
+        const formItemLayout = {
+        };
         return (
             <div className="org-detail">
                 <Layout>
@@ -59,10 +97,39 @@ class App extends Component {
                                 this.state.name
                             }
                             action={
-                                this.state.userStatus == 'NO_LOGIN' ? '' :
-                                this.state.userStatus == 'NO_JOIN' ?
-                                    (<Button type="primary">加入</Button>) :
-                                    (<span>您已加入该组织</span>)
+                                <Popover
+                                    content={
+                                        this.state.userStatus == 'NOT_LOGIN' ?
+                                            (<span>您还未登陆，现在 <a onClick={this.handleOpen.bind(this, 'login')}>登陆</a></span>) :
+                                            (<Form onSubmit={this.handleSubmitApply}>
+                                                <FormItem
+                                                    label="申请理由"
+                                                    {...formItemLayout}
+                                                >
+                                                    {getFieldDecorator('apply-text', {
+                                                        rules: [{ max: 300, message: '不超过300个字符' }, { required: true, message: '不能为空' }],
+                                                        placeholder: '不超过300个字符'
+                                                    })(
+                                                        <TextArea />
+                                                        )}
+                                                </FormItem>
+                                                <div style={{ textAlign: 'right' }}>
+                                                    <Button htmlType="submit" type="primary" size="small" >申请</Button>
+                                                </div>
+                                            </Form>)
+                                    }
+                                    title="参与活动"
+                                    placement="leftTop"
+                                    visible={this.state.isShowJoin}
+                                    trigger="click"
+                                    onVisibleChange={this.handleJoinVisibleChange}
+                                >
+                                    {
+                                        this.state.userStatus == 'NOT_JOIN' || this.state.userStatus == 'NOT_LOGIN' ?
+                                            (<Button type="primary">加入</Button>) :
+                                            (<span>您已加入该组织</span>)
+                                    }
+                                </Popover>
                             }
                             content={
                                 <div>
@@ -94,11 +161,11 @@ class App extends Component {
                         <Card title="当前活动" bordered={false} style={{ marginTop: '24px' }}>
                             <Row>
                                 <List
-                                    grid={{ xs:1,md:4,gutter:16 }}
+                                    grid={{ xs: 1, md: 4, gutter: 16 }}
                                     dataSource={this.state.currentActs}
                                     renderItem={(item, idx) => (
                                         <List.Item style={{ alignItems: 'flex-start' }}>
-                                                <ActivityCard onClick={this.handleOpen.bind(this,'activity/'+item.id)} img={item.img} name={item.name} time={item.start_time} location={item.location}/>
+                                            <ActivityCard onClick={this.handleOpen.bind(this, 'activity/' + item.id)} img={item.img} name={item.name} time={item.start_time} location={item.location} />
                                         </List.Item>
                                     )}
                                 />
@@ -152,6 +219,6 @@ class App extends Component {
         );
     }
 }
-
-ReactDOM.render(<App />, document.getElementById('root'));
+const OrgWrapper = Form.create()(Org);
+ReactDOM.render(<OrgWrapper />, document.getElementById('root'));
 registerServiceWorker();

@@ -102,31 +102,10 @@ class Activity extends Component {
             return state;
         })
     }
-    handleUploadChange = () => {
-        let uid = -1;
-        return ({ file, fileList, event }) => {
-            if (file.status == 'done') {
-                message.success('上传成功');
-                this.setState((state) => {
-                    let newList = state.scoreModal.fileList.slice(0);
-                    newList.push({
-                        uid: uid--,      // 文件唯一标识，建议设置为负数，防止和内部产生的 id 冲突
-                        status: 'done', // 状态有：uploading done error removed
-                        response: file.response, // 服务端响应内容
-                        url: file.response
-                    })
-                    state.scoreModal.fileList = newList;
-                    return state;
-                })
-            } else if (file.status == 'error') {
-                message.error('上传失败');
-                this.setState(state => {
-                    state.scoreModal.isAvatarUploading = false;
-                    return state;
-                });
-            }
-        }
-    }
+    handleUploadChange = ({ fileList }) => this.setState(state=>{
+        state.scoreModal.fileList = fileList;
+        return state;
+    })
     handleScore = (row) => {
         this.setState((state) => {
             state.scoreModal.show = true;
@@ -146,7 +125,10 @@ class Activity extends Component {
                 params: {
                     actId: scoreModal.actId,
                     comment: values.comment || '',
-                    score: values.score
+                    score: values.score,
+                    photos: scoreModal.fileList.map(file=>{
+                        return file.response
+                    }).join()
                 }
             }).then((data) => {
                 message.success('评价成功');
@@ -289,7 +271,7 @@ class Activity extends Component {
                                     listType="picture-card"
                                     fileList={this.state.scoreModal.fileList}
                                     beforeUpload={this.beforeUpload}
-                                    onChange={this.handleUploadChange()}
+                                    onChange={this.handleUploadChange}
                                 >
                                     {this.state.scoreModal.fileList.length >= 4 ? null : uploadButton}
                                 </Upload>
